@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f0f6ff"
+    android:background="@color/appBackground"
     android:padding="16dp"
     tools:context=".MainActivity">
 
@@ -80,7 +80,7 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:paddingHorizontal="12dp"
-                    android:visibility="invisible">
+                    android:visibility="visible">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -152,12 +152,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="#e7f3ff">
+                    app:cardBackgroundColor="@color/appBackground"
+                    app:cardCornerRadius="10dp">
 
                     <LinearLayout
                         android:id="@+id/from_language"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:background="@null"
                         android:orientation="vertical"
                         android:padding="8dp">
 
@@ -166,6 +168,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:background="@null"
                             android:text="English"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -184,7 +187,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="#e7f3ff">
+                    app:cardBackgroundColor="@color/appBackground"
+                    app:cardCornerRadius="10dp">
 
                     <LinearLayout
                         android:id="@+id/to_lanugage"
@@ -235,7 +239,7 @@
                         android:id="@+id/imageView3"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        app:srcCompat="@drawable/mic" />
+                        android:src="@drawable/mic" />
                 </LinearLayout>
 
             </LinearLayout>

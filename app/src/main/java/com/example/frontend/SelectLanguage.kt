@@ -2,6 +2,7 @@ package com.example.frontend
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -19,6 +20,7 @@ class SelectLanguage : AppCompatActivity() {
     private var selectedPosition = -1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.statusBarColor = Color.WHITE
         setContentView(R.layout.activity_select_language)
         val recyclerView = findViewById<RecyclerView>(R.id.languageRecyclerView)
         val confirmButton = findViewById<Button>(R.id.confirmButton)
@@ -37,7 +39,11 @@ class SelectLanguage : AppCompatActivity() {
                 val intent = Intent()
                 intent.putExtra("SELECTED_LANGUAGE", selectedLanguage)
                 setResult(Activity.RESULT_OK, intent)
+                val intent2 = Intent(this, TextTranslation::class.java)
+                intent2.putExtra("toLanguage", selectedLanguage)
+                startActivity(intent2)
                 finish()
+
             } else {
                 Toast.makeText(this, "Please select a language", Toast.LENGTH_SHORT).show()
             }

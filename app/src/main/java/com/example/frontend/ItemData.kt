@@ -5,4 +5,5 @@ data class ItemData(
     val endImg: Int,
     val title: String,
     val description: String,
+    val btn: String,
 )
