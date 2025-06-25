@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.FrontEnd" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorControlActivated">@color/appBlue</item>
+        </style>
+
+    <style name="Theme.FrontEnd" parent="Base.Theme.FrontEnd" />
+    <style name="RadioButtonCustomTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorControlActivated">@color/appBlue</item> <!-- Your desired ON color -->
+        <item name="colorOnSurface">@android:color/darker_gray</item>       <!-- Unchecked color -->
+    </style>
+
+</resources>
