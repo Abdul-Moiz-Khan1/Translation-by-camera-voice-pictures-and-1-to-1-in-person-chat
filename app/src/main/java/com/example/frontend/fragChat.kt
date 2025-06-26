@@ -1,11 +1,14 @@
 package com.example.frontend
 
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -41,8 +44,9 @@ class fragChat : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<ImageView>(R.id.blueSpeaker).setColorFilter(R.color.appBlue)
-        view.findViewById<ImageView>(R.id.convertImg).setColorFilter(R.color.appBlue)
+        view.findViewById<ImageView>(R.id.blueSpeaker).setColorFilter(ContextCompat.getColor(requireContext() , R.color.appBlue), PorterDuff.Mode.SRC_IN)
+        view.findViewById<ImageView>(R.id.convertImg).setColorFilter(ContextCompat.getColor(requireContext() , R.color.appBlue), PorterDuff.Mode.SRC_IN)
+
 
 
     }

@@ -1,21 +1,21 @@
-package com.example.frontend
+package com.example.frontend.adapters
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.RadioButton
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatRadioButton
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.frontend.R
 
 class LanguageAdapter(
     private val languages: List<String>,
     private var selectedPosition: Int = -1,
     private val onItemClick: (String, Int) -> Unit
 ) : RecyclerView.Adapter<LanguageAdapter.LanguageViewHolder>() {
+
+    private var filteredList = languages.toMutableList()
 
     inner class LanguageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val langText: TextView = itemView.findViewById(R.id.languageText)
@@ -29,7 +29,7 @@ class LanguageAdapter(
     }
 
     override fun onBindViewHolder(holder: LanguageViewHolder, position: Int) {
-        val language = languages[position]
+        val language = filteredList[position]
         holder.langText.text = language
 
         val isSelected = position == selectedPosition
@@ -37,22 +37,19 @@ class LanguageAdapter(
             if (isSelected) R.drawable.item_lang_selected else R.drawable.item_lang_unselected
         )
 
-
         holder.radioBtn.setImageResource(
-            if (isSelected) R.drawable.checked
-            else R.drawable.unchecked
+            if (isSelected) R.drawable.checked else R.drawable.unchecked
         )
 
         holder.itemView.setOnClickListener {
             updateSelection(holder.adapterPosition)
-            onItemClick(language, position)
+            onItemClick(language, holder.adapterPosition)
         }
 
         holder.radioBtn.setOnClickListener {
             updateSelection(holder.adapterPosition)
-            onItemClick(language, position)
+            onItemClick(language, holder.adapterPosition)
         }
-
     }
 
     private fun updateSelection(newPosition: Int) {
@@ -64,5 +61,16 @@ class LanguageAdapter(
         }
     }
 
-    override fun getItemCount(): Int = languages.size
+    override fun getItemCount(): Int = filteredList.size
+
+    fun filter(query: String) {
+        filteredList = if (query.isEmpty()) {
+            languages.toMutableList()
+        } else {
+            languages.filter {
+                it.contains(query, ignoreCase = true)
+            }.toMutableList()
+        }
+        notifyDataSetChanged()
+    }
 }

@@ -74,7 +74,7 @@
                 android:padding="8dp">
 
                 <TextView
-                    android:id="@+id/fromlangtextTranslator"
+                    android:id="@+id/fromlang_textTranslator"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
@@ -109,7 +109,7 @@
                 android:padding="8dp">
 
                 <TextView
-                    android:id="@+id/toLanguageText"
+                    android:id="@+id/toLanguage_TextTranslator"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -139,53 +139,68 @@
             android:padding="16dp"
             android:weightSum="1">
 
-            <TextView
-                android:id="@+id/language"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.1"
-                android:text="TextView" />
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/language"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="0.1"
+                    android:text="TextView" />
+
+                <ImageView
+                    android:id="@+id/clearBtnTextTrans"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.9"
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/cancel" />
+
+            </LinearLayout>
+
 
             <EditText
                 android:id="@+id/typedText"
                 android:background="@null"
                 android:gravity="start|top"
+                android:hint="Type your text here"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.9"
                     />
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/linearLayout5"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_weight="0.1"
-                android:gravity="end"
-                android:orientation="horizontal">
+                android:gravity="end">
 
                 <Button
                     android:id="@+id/translateBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/appBlue"
-                    android:text="Translate" />
+                    android:text="Translate"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <LinearLayout
-                    android:id="@+id/micBtn"
+                <ImageView
+                    android:id="@+id/micbtn123"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="@drawable/round"
-                    android:orientation="horizontal"
-                    android:padding="6dp">
+                    android:src="@drawable/blue_mic"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/mic" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

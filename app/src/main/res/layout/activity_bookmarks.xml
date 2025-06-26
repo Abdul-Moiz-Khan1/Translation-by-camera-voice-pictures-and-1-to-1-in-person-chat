@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Settings">
+    tools:context=".Bookmarks">
+
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar6asdsad"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:background="@color/white"
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
@@ -30,18 +30,17 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/backBtnSettings"
+                android:id="@+id/backBtnBookmarks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/back" />
 
             <TextView
-                android:id="@+id/language_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Settings"
+                android:text="Bookmarks"
                 android:textColor="@color/black"
                 android:textSize="24sp" />
 
@@ -49,14 +48,15 @@
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewSettings"
+        android:id="@+id/bookmark_recView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar6asdsad" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

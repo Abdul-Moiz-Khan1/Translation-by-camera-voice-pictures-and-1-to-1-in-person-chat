@@ -18,9 +18,10 @@ import androidx.core.content.ContextCompat.getColor
 class fragHome : Fragment() {
     private var isPowerOn = false
     override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
 
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,6 +36,11 @@ class fragHome : Fragment() {
         val powerIcon = view.findViewById<ImageView>(R.id.powerIcon)
         val languageTextView = view.findViewById<TextView>(R.id.fromlangtext)
         val To_languageTextView = view.findViewById<TextView>(R.id.toLanguageText)
+        val settingsBtn = view.findViewById<ImageView>(R.id.settingsBtn)
+
+        settingsBtn.setOnClickListener {
+            startActivity(Intent(requireContext(), Settings::class.java))
+        }
 
         toggleLayout.setOnClickListener {
             isPowerOn = !isPowerOn
@@ -42,26 +48,33 @@ class fragHome : Fragment() {
             if (isPowerOn) {
                 toggleLayout.setBackgroundResource(R.drawable.bg_toggle_on)
                 powerText.text = "ON"
-                powerIcon.setColorFilter(getColor(requireContext() , R.color.appBlue))
+                powerIcon.setColorFilter(getColor(requireContext(), R.color.appBlue))
+                toggleLayout.rotation = 180f
+                powerIcon.rotation = 180f
+                powerText.rotation = 180f
             } else {
                 toggleLayout.setBackgroundResource(R.drawable.bg_togglwe)
                 powerText.text = "OFF"
-                powerIcon.setColorFilter(getColor(requireContext(),R.color.appOrange))
+                powerIcon.setColorFilter(getColor(requireContext(), R.color.appOrange))
+                toggleLayout.rotation = 0f
+                powerIcon.rotation = 0f
             }
         }
 
-         val languagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val selectedLang = result.data?.getStringExtra("SELECTED_LANGUAGE")
-                languageTextView.text = selectedLang
+        val languagePickerLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val selectedLang = result.data?.getStringExtra("SELECTED_LANGUAGE")
+                    languageTextView.text = selectedLang
+                }
             }
-        }
-         val languagePickerLauncher2 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val selectedLang = result.data?.getStringExtra("SELECTED_LANGUAGE")
-                To_languageTextView.text = selectedLang
+        val languagePickerLauncher2 =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val selectedLang = result.data?.getStringExtra("SELECTED_LANGUAGE")
+                    To_languageTextView.text = selectedLang
+                }
             }
-        }
         view.findViewById<LinearLayout>(R.id.from_language).setOnClickListener {
             val intent = Intent(requireContext(), SelectLanguage::class.java)
             languagePickerLauncher.launch(intent)
