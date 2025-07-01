@@ -33,8 +33,11 @@ import com.example.frontend.R
 import com.example.frontend.databinding.FragmentFargCameraBinding
 import com.example.frontend.presentation.viewModel.HomeViewModel
 import com.google.mlkit.nl.translate.TranslateLanguage
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
+
+@AndroidEntryPoint
 class fargCamera : Fragment() {
 
     private val viewModel by viewModels<HomeViewModel>()
@@ -44,6 +47,8 @@ class fargCamera : Fragment() {
     private lateinit var previewView: PreviewView
     private var imageCapture: ImageCapture? = null
     lateinit var finalUri: Uri
+    var originalOcr: String? = "abc"
+    var translatedOcr: String? = "abc"
 
     private val cropImageLauncher = registerForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
@@ -116,7 +121,6 @@ class fargCamera : Fragment() {
                         activityTitle = "Crop Image"
                         outputCompressFormat = Bitmap.CompressFormat.JPEG
                         outputCompressQuality = 90
-                        // Ensures the crop button and UI are visible
                         showCropOverlay = true
                     }
                 )
@@ -193,8 +197,13 @@ class fargCamera : Fragment() {
         }
 
         binding.translateFin.setOnClickListener {
-
-            viewModel.processImageAndTranslate(requireContext(), finalUri, TranslateLanguage.URDU) { finalBitmap ->
+            viewModel.processImageAndTranslate(
+                requireContext(),
+                finalUri,
+                binding.toLanguageCameraView.text.toString()
+            ) { finalBitmap, original, translated ->
+                originalOcr = original
+                translatedOcr = translated
                 binding.capturedFrame.setImageBitmap(finalBitmap)
             }
 
@@ -204,8 +213,21 @@ class fargCamera : Fragment() {
             binding.FinalbottomLayout.visibility = View.VISIBLE
         }
 
-        binding.blackdownload.setOnClickListener {
-            startActivity(Intent(requireContext(), PictureTranslation::class.java))
+        binding.copyFragCamera.setOnClickListener {
+            val intent = Intent(requireContext(), PictureTranslation::class.java)
+            intent.putExtra("original", originalOcr)
+            intent.putExtra("translated", translatedOcr)
+            startActivity(intent)
+        }
+
+        binding.retakeFragCamera.setOnClickListener {
+            binding.previewView.visibility = View.VISIBLE
+            binding.capturedFrame.visibility = View.GONE
+            binding.translateBtnLayout.visibility = View.GONE
+            binding.bottomLayout.visibility = View.VISIBLE
+            binding.topButtons.visibility = View.VISIBLE
+            binding.finalTopLayout.visibility = View.INVISIBLE
+            binding.FinalbottomLayout.visibility = View.INVISIBLE
         }
     }
 
@@ -244,3 +266,64 @@ class fargCamera : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 }
+
+val languageCodeMap = mapOf(
+    "English" to "en",
+    "Urdu" to "ur",
+    "French" to "fr",
+    "German" to "de",
+    "Spanish" to "es",
+    "Arabic" to "ar",
+    "Hindi" to "hi",
+    "Chinese" to "zh",
+    "Korean" to "ko",
+    "Japanese" to "ja",
+    "Russian" to "ru",
+    "Portuguese" to "pt",
+    "Italian" to "it",
+    "Turkish" to "tr",
+    "Bengali" to "bn",
+    "Polish" to "pl",
+    "Dutch" to "nl",
+    "Vietnamese" to "vi",
+    "Thai" to "th",
+    "Swedish" to "sv",
+    "Indonesian" to "id",
+    "Greek" to "el",
+    "Hebrew" to "he",
+    "Malay" to "ms",
+    "Romanian" to "ro",
+    "Czech" to "cs",
+    "Hungarian" to "hu",
+    "Finnish" to "fi",
+    "Danish" to "da",
+    "Norwegian" to "no",
+    "Filipino" to "tl",
+    "Tamil" to "ta",
+    "Telugu" to "te",
+    "Marathi" to "mr",
+    "Gujarati" to "gu",
+    "Ukrainian" to "uk",
+    "Slovak" to "sk",
+    "Croatian" to "hr",
+    "Bulgarian" to "bg",
+    "Persian" to "fa",
+    "Afrikaans" to "af",
+    "Albanian" to "sq",
+    "Belarusian" to "be",
+    "Catalan" to "ca",
+    "Esperanto" to "eo",
+    "Estonian" to "et",
+    "Galician" to "gl",
+    "Georgian" to "ka",
+    "Haitian Creole" to "ht",
+    "Icelandic" to "is",
+    "Irish" to "ga",
+    "Lithuanian" to "lt",
+    "Latvian" to "lv",
+    "Macedonian" to "mk",
+    "Maltese" to "mt",
+    "Swahili" to "sw",
+    "Tagalog" to "tl",
+    "Welsh" to "cy"
+)

@@ -20,6 +20,8 @@ class TextTranslation : AppCompatActivity() {
         setContentView(binding.root)
         window.statusBarColor = Color.WHITE
 
+        val content = intent.getStringExtra("content")
+        binding.typedText.setText(content)
         val to_language = intent.getStringExtra("toLanguage")
         binding.toLanguageTextTranslator.setText(to_language)
         binding.language.setText(binding.fromlangTextTranslator.text)

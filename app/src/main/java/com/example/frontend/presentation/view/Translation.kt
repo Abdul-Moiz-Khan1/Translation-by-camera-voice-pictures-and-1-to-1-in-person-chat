@@ -70,6 +70,7 @@ class Translation : AppCompatActivity() {
                     )
                 )
             }
+            Toast.makeText(this, "Bookmarked", Toast.LENGTH_SHORT).show()
         }
 
 

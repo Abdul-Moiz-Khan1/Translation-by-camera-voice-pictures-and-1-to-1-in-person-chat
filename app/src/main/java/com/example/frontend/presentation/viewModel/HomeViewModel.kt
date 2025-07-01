@@ -17,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.frontend.domain.model.BookmarkItem
 import com.example.frontend.domain.model.HistoryItem
 import com.example.frontend.domain.repository.TranslationRepository
+import com.example.frontend.domain.repository.languageCodeMap
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
@@ -32,7 +33,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class HomeViewModel  @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val repository: TranslationRepository
 ) : ViewModel() {
 
@@ -48,7 +49,8 @@ class HomeViewModel  @Inject constructor(
         repository.translateText(
             text,
             targetLangCode,
-            onResult = { _translatedText.value = it
+            onResult = {
+                _translatedText.value = it
                 viewModelScope.launch {
                     repository.saveToHistory(
                         HistoryItem(
@@ -59,30 +61,36 @@ class HomeViewModel  @Inject constructor(
                         )
                     )
                 }
-                       },
+            },
             onError = { _translatedText.value = it }
         )
     }
 
-    fun extractText(context: Context, uri: Uri?) {
-        repository.recognizeTextFromUri(context, uri?: Uri.EMPTY).observeForever {
-            _ocrText.value = it
-        }
-    }
     suspend fun getHistoryOnce(): List<HistoryItem> {
         return repository.getHistory().first()
     }
+
     suspend fun AddBookmark(item: BookmarkItem) {
         repository.addBookMark(item)
     }
 
-    fun processImageAndTranslate(context: Context, imageUri: Uri, targetLang: String, callback: (Bitmap) -> Unit) {
+    suspend fun getBookmarks(): List<BookmarkItem> {
+        return repository.getBookmarks()
+    }
+
+    fun processImageAndTranslate(
+        context: Context,
+        imageUri: Uri,
+        targetLang: String,
+        callback: (Bitmap, String?, String?) -> Unit
+    ) {
         val inputImage = InputImage.fromFilePath(context, imageUri)
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
         recognizer.process(inputImage)
             .addOnSuccessListener { visionText ->
-                val originalBitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+                val originalBitmap =
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
                 val mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
                 val canvas = Canvas(mutableBitmap)
 
@@ -98,8 +106,10 @@ class HomeViewModel  @Inject constructor(
                 }
 
                 val options = TranslatorOptions.Builder()
-                    .setSourceLanguage(TranslateLanguage.ENGLISH) // or auto-detect
-                    .setTargetLanguage(targetLang)
+                    .setSourceLanguage(TranslateLanguage.ENGLISH)
+                    .setTargetLanguage(
+                        languageCodeMap[targetLang] ?: "en"
+                    )
                     .build()
 
                 val translator = Translation.getClient(options)
@@ -110,7 +120,6 @@ class HomeViewModel  @Inject constructor(
 
                         fun processNextLine(index: Int) {
                             if (index >= lines.size) {
-                                // All lines processed, draw them
                                 for ((translated, box) in allTranslations) {
                                     box?.let {
                                         canvas.drawRect(it, bgPaint)
@@ -122,7 +131,10 @@ class HomeViewModel  @Inject constructor(
                                         )
                                     }
                                 }
-                                callback(mutableBitmap)
+
+                                val fullTranslatedText =
+                                    allTranslations.joinToString("\n") { it.first }
+                                callback(mutableBitmap, visionText.text, fullTranslatedText)
                                 return
                             }
 
@@ -133,7 +145,12 @@ class HomeViewModel  @Inject constructor(
                                     processNextLine(index + 1)
                                 }
                                 .addOnFailureListener {
-                                    allTranslations.add(Pair(line.text, line.boundingBox)) // fallback
+                                    allTranslations.add(
+                                        Pair(
+                                            line.text,
+                                            line.boundingBox
+                                        )
+                                    ) // fallback
                                     processNextLine(index + 1)
                                 }
                         }
@@ -141,7 +158,11 @@ class HomeViewModel  @Inject constructor(
                         processNextLine(0)
                     }
                     .addOnFailureListener {
-                        Toast.makeText(context, "Failed to download translation model", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Failed to download translation model",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
             }
             .addOnFailureListener {

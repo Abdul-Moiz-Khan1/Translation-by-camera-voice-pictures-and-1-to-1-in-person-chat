@@ -256,24 +256,30 @@
 
 
         <ImageView
+            android:id="@+id/speak_fragCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/black_speaker" />
 
         <ImageView
-            android:id="@+id/blackdownload"
+
+            android:id="@+id/download_fragCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/black_download" />
 
         <ImageView
+
+            android:id="@+id/retake_fragCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/black_camera" />
         <ImageView
+
+            android:id="@+id/copy_fragCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

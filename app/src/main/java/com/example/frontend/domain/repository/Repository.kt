@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class TranslationRepository @Inject constructor(
-    private val historyDao: HistoryDao , private val bookmarkDao: BookmarkDao
+    private val historyDao: HistoryDao, private val bookmarkDao: BookmarkDao
 ) {
 
     fun translateText(
@@ -73,29 +73,6 @@ class TranslationRepository @Inject constructor(
         )
     }
 
-
-    fun recognizeTextFromUri(context: Context, uri: Uri): LiveData<String> {
-        val result = MutableLiveData<String>()
-
-        try {
-            val image = InputImage.fromFilePath(context, uri)
-            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-
-            recognizer.process(image)
-                .addOnSuccessListener { visionText ->
-                    result.postValue(visionText.text)
-                }
-                .addOnFailureListener { e ->
-                    result.postValue("Error: ${e.message}")
-                }
-
-        } catch (e: Exception) {
-            result.postValue("Exception: ${e.message}")
-        }
-
-        return result
-    }
-
     suspend fun saveToHistory(item: HistoryItem) {
         historyDao.insert(item)
     }
@@ -116,24 +93,23 @@ class TranslationRepository @Inject constructor(
         return bookmarkDao.getAllBookmarks()
     }
 
-
-
-}
-
-fun getLanguageCode(text: String, onResult: (String) -> Unit, onError: (String) -> Unit = {}) {
-    val languageIdentifier = LanguageIdentification.getClient()
-    languageIdentifier.identifyLanguage(text)
-        .addOnSuccessListener { languageCode ->
-            if (languageCode == "und") {
-                onError("Can't identify language.")
-            } else {
-                onResult(languageCode)
+    fun getLanguageCode(text: String, onResult: (String) -> Unit, onError: (String) -> Unit = {}) {
+        val languageIdentifier = LanguageIdentification.getClient()
+        languageIdentifier.identifyLanguage(text)
+            .addOnSuccessListener { languageCode ->
+                if (languageCode == "und") {
+                    onError("Can't identify language.")
+                } else {
+                    onResult(languageCode)
+                }
             }
-        }
-        .addOnFailureListener {
-            onError(it.localizedMessage ?: "Unknown error")
-        }
+            .addOnFailureListener {
+                onError(it.localizedMessage ?: "Unknown error")
+            }
+    }
+
 }
+
 
 val languageCodeMap = mapOf(
     "English" to "en",

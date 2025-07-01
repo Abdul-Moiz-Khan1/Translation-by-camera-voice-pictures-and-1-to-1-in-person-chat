@@ -3,9 +3,12 @@ package com.example.frontend.presentation.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -44,6 +47,31 @@ class fragHome : Fragment() {
         settingsBtn.setOnClickListener {
             startActivity(Intent(requireContext(), Settings::class.java))
         }
+
+        view.findViewById<EditText>(R.id.originalText_fragHome).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                p0: CharSequence?,
+                p1: Int,
+                p2: Int,
+                p3: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                p0: CharSequence?,
+                p1: Int,
+                p2: Int,
+                p3: Int
+            ) {
+                val intent = Intent(requireContext(), TextTranslation::class.java)
+                intent.putExtra("content", p0.toString())
+                intent.putExtra("toLanguage" , "Urdu")
+                startActivity(intent)
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+            }
+        })
 
         toggleLayout.setOnClickListener {
             isPowerOn = !isPowerOn
