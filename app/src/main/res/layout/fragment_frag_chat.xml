@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragChat">
+    tools:context=".presentation.view.fragChat">
 
     <androidx.appcompat.widget.Toolbar
         android:layout_width="match_parent"
@@ -143,7 +143,7 @@
                     app:cardCornerRadius="10dp">
 
                     <LinearLayout
-                        android:id="@+id/from_language"
+                        android:id="@+id/lineLay"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -154,7 +154,7 @@
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/fromlangtext"
+                        android:id="@+id/text12"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"

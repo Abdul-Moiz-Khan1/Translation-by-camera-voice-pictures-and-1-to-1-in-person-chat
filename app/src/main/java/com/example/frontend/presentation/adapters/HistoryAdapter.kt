@@ -1,4 +1,4 @@
-package com.example.frontend.adapters
+package com.example.frontend.presentation.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frontend.R
-import com.example.frontend.model.HistoryItem
+import com.example.frontend.domain.model.HistoryItem
 
 class HistoryAdapter(private val items: List<HistoryItem>) :
     RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {

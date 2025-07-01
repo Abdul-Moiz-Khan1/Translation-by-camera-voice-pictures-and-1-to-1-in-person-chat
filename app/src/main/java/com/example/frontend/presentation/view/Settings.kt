@@ -1,12 +1,13 @@
-package com.example.frontend
+package com.example.frontend.presentation.view
 
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.frontend.adapters.SettingsAdapter
+import com.example.frontend.R
+import com.example.frontend.presentation.adapters.SettingsAdapter
 import com.example.frontend.databinding.ActivitySettingsBinding
-import com.example.frontend.model.ItemData
+import com.example.frontend.domain.model.ItemData
 
 class Settings : AppCompatActivity() {
     private lateinit var binding : ActivitySettingsBinding
@@ -39,7 +40,7 @@ class Settings : AppCompatActivity() {
 
         )
 
-        val adapter = SettingsAdapter(settingsItems , this)
+        val adapter = SettingsAdapter(settingsItems, this)
         binding.recyclerViewSettings.adapter = adapter
         binding.recyclerViewSettings.layoutManager = LinearLayoutManager(this)
 

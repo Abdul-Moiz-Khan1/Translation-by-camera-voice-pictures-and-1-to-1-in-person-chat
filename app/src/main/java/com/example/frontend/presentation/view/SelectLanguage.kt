@@ -1,23 +1,15 @@
-package com.example.frontend
+package com.example.frontend.presentation.view
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.frontend.adapters.LanguageAdapter
+import com.example.frontend.presentation.adapters.LanguageAdapter
 import com.example.frontend.databinding.ActivitySelectLanguageBinding
 
 class SelectLanguage : AppCompatActivity() {
@@ -32,11 +24,13 @@ class SelectLanguage : AppCompatActivity() {
         window.statusBarColor = Color.WHITE
         setContentView(binding.root)
 
+        val from = intent.getStringExtra("from")
+
              adapter = LanguageAdapter(languages) { language, position ->
-            selectedLanguage = language
-            selectedPosition = position
+                 selectedLanguage = language
+                 selectedPosition = position
                  binding.confirmButton.visibility = View.VISIBLE
-        }
+             }
 
         binding.languageRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.languageRecyclerView.adapter = adapter
@@ -49,7 +43,7 @@ class SelectLanguage : AppCompatActivity() {
             binding.searchView.requestFocus()
         }
 
-        binding.searchView.addTextChangedListener(object : TextWatcher{
+        binding.searchView.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
                 s: CharSequence?,
                 start: Int,
@@ -74,10 +68,16 @@ class SelectLanguage : AppCompatActivity() {
         })
 
         binding.confirmButton.setOnClickListener {
-            if (selectedLanguage != null) {
+            if(from == "camera"){
+                val intent = Intent()
+                intent.putExtra("selected_language_for_camera", selectedLanguage)
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+            else if (selectedLanguage != null) {
                 val intent = Intent()
                 intent.putExtra("SELECTED_LANGUAGE", selectedLanguage)
-                setResult(Activity.RESULT_OK, intent)
+                setResult(RESULT_OK, intent)
                 val intent2 = Intent(this, TextTranslation::class.java)
                 intent2.putExtra("toLanguage", selectedLanguage)
                 startActivity(intent2)
@@ -89,17 +89,20 @@ class SelectLanguage : AppCompatActivity() {
         }
 
         binding.backButton.setOnClickListener {
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         }
 
     }
     private val languages = listOf(
-        "English", "Urdu", "French", "German", "Spanish", "Arabic", "Hindi", "Chinese", "Korean", "Japanese",
-        "Russian", "Portuguese", "Italian", "Turkish", "Bengali", "Polish", "Dutch", "Vietnamese", "Thai", "Swedish",
-        "Indonesian", "Greek", "Hebrew", "Malay", "Romanian", "Czech", "Hungarian", "Finnish", "Danish", "Norwegian",
-        "Filipino", "Tamil", "Telugu", "Punjabi", "Marathi", "Gujarati", "Ukrainian", "Slovak", "Serbian", "Croatian",
-        "Bulgarian", "Persian", "Pashto", "Sinhala", "Swahili", "Zulu", "Malayalam", "Latvian", "Estonian", "Icelandic"
+        "Afrikaans", "Albanian", "Arabic", "Belarusian", "Bulgarian", "Bengali", "Catalan", "Chinese",
+        "Croatian", "Czech", "Danish", "Dutch", "English", "Esperanto", "Estonian", "Finnish", "French",
+        "Galician", "Georgian", "German", "Greek", "Gujarati", "Haitian Creole", "Hebrew", "Hindi",
+        "Hungarian", "Icelandic", "Indonesian", "Irish", "Italian", "Japanese", "Kannada", "Korean",
+        "Lithuanian", "Latvian", "Macedonian", "Marathi", "Malay", "Maltese", "Norwegian", "Persian",
+        "Polish", "Portuguese", "Romanian", "Russian", "Slovak", "Slovenian", "Spanish", "Swedish",
+        "Swahili", "Tagalog", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Urdu", "Vietnamese",
+        "Welsh"
     )
 
 }

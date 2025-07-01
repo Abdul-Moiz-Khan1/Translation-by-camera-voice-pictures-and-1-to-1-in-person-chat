@@ -1,4 +1,4 @@
-package com.example.frontend.model
+package com.example.frontend.domain.model
 
 import android.app.Activity
 

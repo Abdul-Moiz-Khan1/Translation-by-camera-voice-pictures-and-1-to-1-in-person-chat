@@ -1,4 +1,4 @@
-package com.example.frontend.adapters
+package com.example.frontend.presentation.adapters
 
 import android.content.Context
 import android.content.Intent
@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.frontend.R
-import com.example.frontend.model.ItemData
+import com.example.frontend.domain.model.ItemData
 
 class SettingsAdapter(
     private val items: List<ItemData>,

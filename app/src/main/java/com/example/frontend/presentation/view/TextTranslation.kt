@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.example.frontend.presentation.view
 
 import android.content.Intent
 import android.graphics.Color
@@ -6,13 +6,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
+import com.example.frontend.R
+import com.example.frontend.presentation.view.Translation
 import com.example.frontend.databinding.ActivityTextTranslationBinding
 
 class TextTranslation : AppCompatActivity() {
@@ -23,10 +20,9 @@ class TextTranslation : AppCompatActivity() {
         setContentView(binding.root)
         window.statusBarColor = Color.WHITE
 
-        val from_language = intent.getStringExtra("fromLanguage")
         val to_language = intent.getStringExtra("toLanguage")
-        binding.fromlangTextTranslator.setText(to_language)
-        binding.language.setText(to_language)
+        binding.toLanguageTextTranslator.setText(to_language)
+        binding.language.setText(binding.fromlangTextTranslator.text)
 
         val typedText = findViewById<EditText>(R.id.typedText)
 
@@ -75,7 +71,9 @@ class TextTranslation : AppCompatActivity() {
         binding.translateBtn.setOnClickListener {
             val intent = Intent(this, Translation::class.java)
             intent.putExtra("content", typedText.text.toString())
+            intent.putExtra("targetLang", to_language)
             startActivity(intent)
+            finish()
         }
 
         binding.backBtnTranslate.setOnClickListener {

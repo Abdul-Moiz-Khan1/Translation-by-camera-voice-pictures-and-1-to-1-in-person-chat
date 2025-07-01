@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,28 +16,28 @@
         android:theme="@style/Theme.FrontEnd"
         tools:targetApi="31">
         <activity
-            android:name=".Bookmarks"
+            android:name=".presentation.view.Bookmarks"
             android:exported="false" />
         <activity
-            android:name=".History"
+            android:name=".presentation.view.History"
             android:exported="false" />
         <activity
-            android:name=".PictureTranslation"
+            android:name=".presentation.view.PictureTranslation"
             android:exported="false" />
         <activity
-            android:name=".Translation"
+            android:name=".presentation.view.Translation"
             android:exported="false" />
         <activity
-            android:name=".TextTranslation"
+            android:name=".presentation.view.TextTranslation"
             android:exported="false" />
         <activity
-            android:name=".Settings"
+            android:name=".presentation.view.Settings"
             android:exported="false" />
         <activity
-            android:name=".SelectLanguage"
+            android:name=".presentation.view.SelectLanguage"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,6 +45,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar" />
+
     </application>
 
 </manifest>

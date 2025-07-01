@@ -1,36 +1,26 @@
-package com.example.frontend
+package com.example.frontend.presentation.view
 
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import androidx.fragment.app.Fragment
+import com.example.frontend.R
 
 /**
- * A simple [Fragment] subclass.
+ * A simple [androidx.fragment.app.Fragment] subclass.
  * Use the [fragChat.newInstance] factory method to
  * create an instance of this fragment.
  */
 class fragChat : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
     override fun onCreateView(
@@ -46,7 +36,6 @@ class fragChat : Fragment() {
 
         view.findViewById<ImageView>(R.id.blueSpeaker).setColorFilter(ContextCompat.getColor(requireContext() , R.color.appBlue), PorterDuff.Mode.SRC_IN)
         view.findViewById<ImageView>(R.id.convertImg).setColorFilter(ContextCompat.getColor(requireContext() , R.color.appBlue), PorterDuff.Mode.SRC_IN)
-
 
 
     }

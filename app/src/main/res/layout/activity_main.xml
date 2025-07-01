@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f0f6ff"
-    tools:context=".MainActivity">
+    tools:context=".presentation.view.MainActivity">
 
     <FrameLayout
         android:id="@+id/nav_host_fragment"

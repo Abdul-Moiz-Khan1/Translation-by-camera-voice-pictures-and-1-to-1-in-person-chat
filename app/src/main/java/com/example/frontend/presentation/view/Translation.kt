@@ -1,18 +1,25 @@
-package com.example.frontend
+package com.example.frontend.presentation.view
 
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.frontend.databinding.ActivityTranslationBinding
+import com.example.frontend.domain.model.BookmarkItem
+import com.example.frontend.presentation.viewModel.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import kotlin.getValue
 
+@AndroidEntryPoint
 class Translation : AppCompatActivity() {
+
+    private val viewModel: HomeViewModel by viewModels()
+
     private lateinit var binding: ActivityTranslationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,9 +28,16 @@ class Translation : AppCompatActivity() {
         window.statusBarColor = Color.WHITE
 
         val content = intent.getStringExtra("content")
+        val targetLanguage = intent.getStringExtra("targetLang")
 
-            binding.originalText.setText(content)
-        binding.translatedText.setText(content)
+        Log.d("Translation_origin", "content: $content , targetLanguage: $targetLanguage")
+        viewModel.translateText(content.toString(), targetLanguage.toString())
+        viewModel.translatedText.observe(this) { translatedText ->
+            binding.translatedText.setText(translatedText)
+        }
+
+        binding.originalText.setText(content)
+
         binding.backBtnTranslateFin.setOnClickListener {
             finish()
         }
@@ -47,7 +61,15 @@ class Translation : AppCompatActivity() {
             Toast.makeText(this, "Fullscreen", Toast.LENGTH_SHORT).show()
         }
         binding.bookmark.setOnClickListener {
-            Toast.makeText(this, "Bookmarked", Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                viewModel.AddBookmark(
+                    BookmarkItem(
+                        0,
+                        binding.originalText.text.toString(),
+                        binding.translatedText.text.toString()
+                    )
+                )
+            }
         }
 
 
