@@ -10,8 +10,10 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.frontend.domain.model.BookmarkItem
@@ -40,8 +42,34 @@ class HomeViewModel @Inject constructor(
     private val _translatedText = MutableLiveData<String>()
     val translatedText: LiveData<String> get() = _translatedText
 
-    private val _ocrText = MutableLiveData<String>()
-    val ocrText: LiveData<String> get() = _ocrText
+    fun translateText(text: String, targetLang: String, onResult: (String) -> Unit) {
+        Log.d("Translation_viewmodel", "content: $text , targetLanguage: $targetLang")
+
+
+        viewModelScope.launch {
+            val translated = repository.translateText(
+                text,
+                targetLang,
+                onResult = {
+                    _translatedText.value = it
+                    viewModelScope.launch {
+                        repository.saveToHistory(
+                            HistoryItem(
+                                0,
+                                language = targetLang,
+                                originalText = text,
+                                translatedText = it
+                            )
+                        )
+                    }
+
+                    onResult(translatedText.value.toString())
+                },
+                onError = { _translatedText.value = it }
+            )
+        }
+    }
+
 
     fun translateText(text: String, targetLangCode: String) {
         Log.d("Translation_viewmodel", "content: $text , targetLanguage: $targetLangCode")
@@ -170,4 +198,13 @@ class HomeViewModel @Inject constructor(
             }
     }
 
+
+}
+fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+    observe(lifecycleOwner, object : Observer<T> {
+        override fun onChanged(value: T) {
+            observer.onChanged(value)
+            removeObserver(this)
+        }
+    })
 }

@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.frontend.presentation.adapters.LanguageAdapter
@@ -14,6 +15,7 @@ import com.example.frontend.databinding.ActivitySelectLanguageBinding
 
 class SelectLanguage : AppCompatActivity() {
     private lateinit var adapter: LanguageAdapter
+
 
     private lateinit var binding: ActivitySelectLanguageBinding
     private var selectedLanguage: String? = null

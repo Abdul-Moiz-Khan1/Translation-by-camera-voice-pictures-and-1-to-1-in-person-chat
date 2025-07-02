@@ -6,5 +6,6 @@
     <color name="appOrange">#E74C3C</color>
     <color name="appBackground">#F0F6FF</color>
     <color name="btngry">#afafaf</color>
+    <color name="lightblack">#88000000</color>
 
 </resources>

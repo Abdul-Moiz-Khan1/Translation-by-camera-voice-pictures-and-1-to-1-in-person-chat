@@ -3,6 +3,7 @@ package com.example.frontend.presentation.view
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.frontend.R
 import com.example.frontend.databinding.ActivityMainBinding
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = Color.WHITE
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
 
         bottomNav = findViewById(R.id.bottomNavigationView)
 

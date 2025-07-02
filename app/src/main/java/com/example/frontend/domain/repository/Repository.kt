@@ -32,13 +32,17 @@ class TranslationRepository @Inject constructor(
         onError: (String) -> Unit
     ) {
         Log.d("Translation_repo", "content: $text , targetLanguage: $targetLangCode")
-        val code = languageCodeMap[targetLangCode] ?: "en"
+        val code = languageCodeMap[targetLangCode] ?: targetLangCode
 
         getLanguageCode(
             text,
             onResult = { detectedLang ->
+                var newlang = detectedLang
+                if(newlang.toString().contains("Latn")){
+                    newlang = "hi"
+                }
                 val options = TranslatorOptions.Builder()
-                    .setSourceLanguage(detectedLang)
+                    .setSourceLanguage(newlang)
                     .setTargetLanguage(code)
                     .build()
                 Log.d("Translation_repo", "detectedlang: $detectedLang")

@@ -2,7 +2,10 @@ package com.example.frontend.presentation.view
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -23,7 +26,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class fragHome : Fragment() {
 
-
+    private var translationHandler: Handler? = null
+    private var translationRunnable: Runnable? = null
     private var isPowerOn = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +47,28 @@ class fragHome : Fragment() {
         val powerText = view.findViewById<TextView>(R.id.powerText)
         val powerIcon = view.findViewById<ImageView>(R.id.powerIcon)
         val settingsBtn = view.findViewById<ImageView>(R.id.settingsBtn)
+        val originalBtn = view.findViewById<TextView>(R.id.originalBtn)
+        val translatedBtn = view.findViewById<TextView>(R.id.translatedBtn)
+
+
+        originalBtn.setOnClickListener {
+            originalBtn.setBackgroundResource(R.drawable.bg_left_selected)
+            translatedBtn.setBackgroundResource(R.drawable.bg_left_unselected)
+            originalBtn.setTextColor(Color.WHITE)
+            translatedBtn.setTextColor(Color.BLACK)
+
+            // 👉 Add your logic here to show "Original" text
+        }
+
+        translatedBtn.setOnClickListener {
+            translatedBtn.setBackgroundResource(R.drawable.bg_right_selected)
+            originalBtn.setBackgroundResource(R.drawable.bg_right_unselected)
+            translatedBtn.setTextColor(Color.BLACK)
+            originalBtn.setTextColor(Color.WHITE)
+
+            // 👉 Add your logic here to show "Translated" text
+        }
+
 
         settingsBtn.setOnClickListener {
             startActivity(Intent(requireContext(), Settings::class.java))
@@ -63,13 +89,24 @@ class fragHome : Fragment() {
                 p2: Int,
                 p3: Int
             ) {
-                val intent = Intent(requireContext(), TextTranslation::class.java)
-                intent.putExtra("content", p0.toString())
-                intent.putExtra("toLanguage" , "Urdu")
-                startActivity(intent)
             }
 
             override fun afterTextChanged(p0: Editable?) {
+
+                translationRunnable?.let { translationHandler?.removeCallbacks(it) } // cancel previous calls
+
+                translationHandler = Handler(Looper.getMainLooper())
+                translationRunnable = Runnable {
+                    val content = p0.toString()
+                    val lang = view.findViewById<TextView>(R.id.toLanguageText).text.toString()
+
+                    val intent = Intent(requireContext(), TextTranslation::class.java)
+                    intent.putExtra("content", content)
+                    intent.putExtra("toLanguage", lang)
+                    startActivity(intent)
+                }
+
+                translationHandler?.postDelayed(translationRunnable!!, 600)
             }
         })
 
@@ -104,5 +141,10 @@ class fragHome : Fragment() {
             startActivity(intent)
 
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        translationRunnable?.let { translationHandler?.removeCallbacks(it) }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.frontend.presentation.view
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,7 @@ class History : AppCompatActivity() {
         binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        window.statusBarColor = Color.WHITE
         binding.backBtnHistory.setOnClickListener {
             finish()
         }
