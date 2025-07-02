@@ -47,27 +47,7 @@ class fragHome : Fragment() {
         val powerText = view.findViewById<TextView>(R.id.powerText)
         val powerIcon = view.findViewById<ImageView>(R.id.powerIcon)
         val settingsBtn = view.findViewById<ImageView>(R.id.settingsBtn)
-        val originalBtn = view.findViewById<TextView>(R.id.originalBtn)
-        val translatedBtn = view.findViewById<TextView>(R.id.translatedBtn)
 
-
-        originalBtn.setOnClickListener {
-            originalBtn.setBackgroundResource(R.drawable.bg_left_selected)
-            translatedBtn.setBackgroundResource(R.drawable.bg_left_unselected)
-            originalBtn.setTextColor(Color.WHITE)
-            translatedBtn.setTextColor(Color.BLACK)
-
-            // 👉 Add your logic here to show "Original" text
-        }
-
-        translatedBtn.setOnClickListener {
-            translatedBtn.setBackgroundResource(R.drawable.bg_right_selected)
-            originalBtn.setBackgroundResource(R.drawable.bg_right_unselected)
-            translatedBtn.setTextColor(Color.BLACK)
-            originalBtn.setTextColor(Color.WHITE)
-
-            // 👉 Add your logic here to show "Translated" text
-        }
 
 
         settingsBtn.setOnClickListener {

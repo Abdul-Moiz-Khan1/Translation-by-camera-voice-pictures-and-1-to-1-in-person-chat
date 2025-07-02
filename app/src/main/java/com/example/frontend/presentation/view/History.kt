@@ -5,8 +5,10 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.frontend.R
 import com.example.frontend.presentation.adapters.HistoryAdapter
 import com.example.frontend.databinding.ActivityHistoryBinding
 import com.example.frontend.domain.model.HistoryItem
@@ -24,7 +26,8 @@ class History : AppCompatActivity() {
         binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = Color.WHITE
+
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
         binding.backBtnHistory.setOnClickListener {
             finish()
         }

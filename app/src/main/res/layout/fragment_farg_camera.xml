@@ -170,16 +170,40 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/toggleContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_toggle_container"
+            android:orientation="horizontal"
+            android:padding="2dp"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="horizontal">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView4">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/final_top_group" />
+            <TextView
+                android:id="@+id/originalBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_right_unselected"
+                android:gravity="center"
+                android:text="Original"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/translatedBtn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_right_selected"
+                android:gravity="center"
+                android:text="Translated"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                />
         </LinearLayout>
 
     </LinearLayout>

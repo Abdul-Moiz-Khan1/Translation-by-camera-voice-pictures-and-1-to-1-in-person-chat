@@ -9,7 +9,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.frontend.R
 import com.example.frontend.presentation.adapters.LanguageAdapter
 import com.example.frontend.databinding.ActivitySelectLanguageBinding
 
@@ -23,7 +25,8 @@ class SelectLanguage : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivitySelectLanguageBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
-        window.statusBarColor = Color.WHITE
+
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
         setContentView(binding.root)
 
         val from = intent.getStringExtra("from")

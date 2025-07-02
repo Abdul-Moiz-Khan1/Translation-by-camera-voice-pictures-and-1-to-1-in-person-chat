@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +48,7 @@ class fargCamera : Fragment() {
     private lateinit var previewView: PreviewView
     private var imageCapture: ImageCapture? = null
     lateinit var finalUri: Uri
+    lateinit var translatedBitmap: Bitmap
     var originalOcr: String? = "abc"
     var translatedOcr: String? = "abc"
 
@@ -91,11 +93,32 @@ class fargCamera : Fragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val selectedLanguage = result.data?.getStringExtra("selected_language_for_camera")
                 selectedLanguage?.let {
-                    // ✅ Use the selected language here
                     Log.d("HomeFragment", "Selected: $it")
                     binding.toLanguageCameraView.text = it // for example
                 }
             }
+        }
+
+        val originalBtn = view.findViewById<TextView>(R.id.originalBtn)
+        val translatedBtn = view.findViewById<TextView>(R.id.translatedBtn)
+
+
+        originalBtn.setOnClickListener {
+            originalBtn.setBackgroundResource(R.drawable.bg_right_selected)
+            translatedBtn.setBackgroundResource(R.drawable.bg_left_unselected)
+            originalBtn.setTextColor(Color.BLACK)
+            translatedBtn.setTextColor(Color.WHITE)
+            binding.capturedFrame.setImageURI(finalUri)
+
+        }
+
+        translatedBtn.setOnClickListener {
+            translatedBtn.setBackgroundResource(R.drawable.bg_right_selected)
+            originalBtn.setBackgroundResource(R.drawable.bg_right_unselected)
+            translatedBtn.setTextColor(Color.BLACK)
+            originalBtn.setTextColor(Color.WHITE)
+            binding.capturedFrame.setImageBitmap(translatedBitmap)
+
         }
 
         binding.toLanguageCameraView.setOnClickListener {
@@ -202,6 +225,7 @@ class fargCamera : Fragment() {
                 finalUri,
                 binding.toLanguageCameraView.text.toString()
             ) { finalBitmap, original, translated ->
+                translatedBitmap = finalBitmap
                 originalOcr = original
                 translatedOcr = translated
                 binding.capturedFrame.setImageBitmap(finalBitmap)

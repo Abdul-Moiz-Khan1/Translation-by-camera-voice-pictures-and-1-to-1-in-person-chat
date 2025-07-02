@@ -3,6 +3,7 @@ package com.example.frontend.presentation.view
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.frontend.R
 import com.example.frontend.presentation.adapters.SettingsAdapter
@@ -15,7 +16,8 @@ class Settings : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.statusBarColor = Color.WHITE
+
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
 
         binding.backBtnSettings.setOnClickListener {
             finish()

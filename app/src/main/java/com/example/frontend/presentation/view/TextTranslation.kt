@@ -8,6 +8,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.frontend.R
 import com.example.frontend.presentation.view.Translation
 import com.example.frontend.databinding.ActivityTextTranslationBinding
@@ -18,15 +19,14 @@ class TextTranslation : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTextTranslationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.statusBarColor = Color.WHITE
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
 
-        val content = intent.getStringExtra("content")
-        binding.typedText.setText(content)
+        val textToEdit = intent.getStringExtra("text_to_edit") ?: intent.getStringExtra("content")
+
+        binding.typedText.setText(textToEdit)
         val to_language = intent.getStringExtra("toLanguage")
         binding.toLanguageTextTranslator.setText(to_language)
         binding.language.setText(binding.fromlangTextTranslator.text)
-
-        val typedText = findViewById<EditText>(R.id.typedText)
 
         binding.fromlangTextTranslator.setOnClickListener {
             startActivity(Intent(this, SelectLanguage::class.java))
@@ -72,7 +72,7 @@ class TextTranslation : AppCompatActivity() {
 
         binding.translateBtn.setOnClickListener {
             val intent = Intent(this, Translation::class.java)
-            intent.putExtra("content", typedText.text.toString())
+            intent.putExtra("content", binding.typedText.text.toString())
             intent.putExtra("targetLang", to_language)
             startActivity(intent)
             finish()

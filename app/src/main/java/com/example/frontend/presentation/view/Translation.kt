@@ -1,13 +1,16 @@
 package com.example.frontend.presentation.view
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.frontend.R
 import com.example.frontend.databinding.ActivityTranslationBinding
 import com.example.frontend.domain.model.BookmarkItem
 import com.example.frontend.presentation.viewModel.HomeViewModel
@@ -25,7 +28,7 @@ class Translation : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTranslationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.statusBarColor = Color.WHITE
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
 
         val content = intent.getStringExtra("content")
         val targetLanguage = intent.getStringExtra("targetLang")
@@ -45,8 +48,11 @@ class Translation : AppCompatActivity() {
             binding.originalText.setText("")
         }
         binding.edit.setOnClickListener {
-            binding.originalText.isEnabled = true
-            binding.originalText.requestFocus()
+            val intent = Intent(this , TextTranslation::class.java)
+            intent.putExtra("text_to_edit" , binding.originalText.text.toString())
+            intent.putExtra("toLanguage" , targetLanguage)
+            startActivity(intent)
+            finish()
         }
         binding.copyoriginal.setOnClickListener {
             Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()

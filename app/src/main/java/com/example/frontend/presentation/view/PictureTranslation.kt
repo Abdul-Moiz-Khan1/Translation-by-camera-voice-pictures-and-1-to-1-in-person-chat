@@ -21,6 +21,8 @@ class PictureTranslation : AppCompatActivity() {
     private val viewModel: HomeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
         setContentView(R.layout.activity_picture_translation)
 
         findViewById<ImageView>(R.id.backBtnPictureTranslation).setOnClickListener {
