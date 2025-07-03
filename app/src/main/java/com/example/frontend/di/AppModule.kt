@@ -1,5 +1,6 @@
 package com.example.frontend.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.example.frontend.data.local.BookmarkDao
@@ -9,6 +10,7 @@ import com.example.frontend.data.local.HistoryDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -35,5 +37,6 @@ object AppModule {
     fun provideBookmarkDao(database: HistoryDatabase): BookmarkDao {
         return database.bookmarkDao()
     }
+
 
 }

@@ -1,16 +1,20 @@
 package com.example.frontend.presentation.view
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,14 +24,26 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.frontend.R
+import com.example.frontend.databinding.FragmentFargCameraBinding
+import com.example.frontend.databinding.FragmentFragHomeBinding
 import com.example.frontend.presentation.viewModel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class fragHome : Fragment() {
+    private val viewModel: HomeViewModel by viewModels()
+    private var _binding: FragmentFragHomeBinding? = null
+    private val binding get() = _binding!!
 
-    private var translationHandler: Handler? = null
-    private var translationRunnable: Runnable? = null
+    private val speechRecognizerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val matches = result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                if (!matches.isNullOrEmpty()) {
+                    binding.originalTextFragHome.setText(matches[0])
+                }
+            }
+        }
     private var isPowerOn = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,23 +54,33 @@ class fragHome : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_frag_home, container, false)
+        _binding = FragmentFragHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val toggleLayout = view.findViewById<LinearLayout>(R.id.toggleButton)
-        val powerText = view.findViewById<TextView>(R.id.powerText)
-        val powerIcon = view.findViewById<ImageView>(R.id.powerIcon)
-        val settingsBtn = view.findViewById<ImageView>(R.id.settingsBtn)
+
+        binding.mic1HomeFrag.setOnClickListener {
+            startSpeechToText()
+        }
 
 
+        binding.translateBtnHomeFrag.setOnClickListener {
+            val intent = Intent(requireContext(), Translation::class.java)
+            intent.putExtra("content",   binding.originalTextFragHome.text.toString())
+            intent.putExtra(
+                "targetLang",
+                view.findViewById<TextView>(R.id.toLanguageText).text.toString()
+            )
+            startActivity(intent)
+        }
 
-        settingsBtn.setOnClickListener {
+        binding.settingsBtn.setOnClickListener {
             startActivity(Intent(requireContext(), Settings::class.java))
         }
 
-        view.findViewById<EditText>(R.id.originalText_fragHome).addTextChangedListener(object : TextWatcher {
+        binding.originalTextFragHome.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
                 p0: CharSequence?,
                 p1: Int,
@@ -69,49 +95,44 @@ class fragHome : Fragment() {
                 p2: Int,
                 p3: Int
             ) {
+                if (p0.toString().isNotEmpty()) {
+                    binding.mic1HomeFrag.visibility = View.INVISIBLE
+                    binding.translateBtnHomeFrag.visibility = View.VISIBLE
+                } else {
+                    binding.mic1HomeFrag.visibility = View.VISIBLE
+                    binding.translateBtnHomeFrag.visibility = View.INVISIBLE
+                }
+
             }
 
             override fun afterTextChanged(p0: Editable?) {
 
-                translationRunnable?.let { translationHandler?.removeCallbacks(it) } // cancel previous calls
 
-                translationHandler = Handler(Looper.getMainLooper())
-                translationRunnable = Runnable {
-                    val content = p0.toString()
-                    val lang = view.findViewById<TextView>(R.id.toLanguageText).text.toString()
-
-                    val intent = Intent(requireContext(), TextTranslation::class.java)
-                    intent.putExtra("content", content)
-                    intent.putExtra("toLanguage", lang)
-                    startActivity(intent)
-                }
-
-                translationHandler?.postDelayed(translationRunnable!!, 600)
             }
         })
 
-        toggleLayout.setOnClickListener {
+        binding.toggleButton.setOnClickListener {
             isPowerOn = !isPowerOn
 
             if (isPowerOn) {
-                toggleLayout.setBackgroundResource(R.drawable.bg_toggle_on)
-                powerText.text = "ON"
-                powerIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.appBlue))
-                toggleLayout.rotation = 180f
-                powerIcon.rotation = 180f
-                powerText.rotation = 180f
+                binding.toggleButton.setBackgroundResource(R.drawable.bg_toggle_on)
+                binding.powerText.text = "ON"
+                binding.powerIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.appBlue))
+                binding.toggleButton.rotation = 180f
+                binding.powerIcon.rotation = 180f
+                binding.powerText.rotation = 180f
             } else {
-                toggleLayout.setBackgroundResource(R.drawable.bg_togglwe)
-                powerText.text = "OFF"
-                powerIcon.setColorFilter(
+                binding.toggleButton.setBackgroundResource(R.drawable.bg_togglwe)
+                binding.powerText.text = "OFF"
+                binding.powerIcon.setColorFilter(
                     ContextCompat.getColor(
                         requireContext(),
                         R.color.appOrange
                     )
                 )
-                toggleLayout.rotation = 0f
-                powerIcon.rotation = 0f
-                powerText.rotation = 0f
+                binding.toggleButton.rotation = 0f
+                binding.powerIcon.rotation = 0f
+                binding.powerText.rotation = 0f
             }
         }
 
@@ -125,6 +146,23 @@ class fragHome : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        translationRunnable?.let { translationHandler?.removeCallbacks(it) }
+    }
+    private fun startSpeechToText() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+
+        val langCode = "en-US"
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, langCode)
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...")
+
+        try {
+            speechRecognizerLauncher.launch(intent)
+        } catch (e: Exception) {
+            Log.d("ERRORRR" , e.message.toString())
+        }
     }
 }
+

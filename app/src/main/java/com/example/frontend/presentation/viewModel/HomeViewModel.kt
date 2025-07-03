@@ -1,5 +1,7 @@
 package com.example.frontend.presentation.viewModel
 
+import android.app.Application
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -7,9 +9,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Environment
 import android.provider.MediaStore
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +25,7 @@ import com.example.frontend.domain.model.BookmarkItem
 import com.example.frontend.domain.model.HistoryItem
 import com.example.frontend.domain.repository.TranslationRepository
 import com.example.frontend.domain.repository.languageCodeMap
+import com.example.frontend.presentation.view.SIDE
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
@@ -36,15 +42,29 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val application: Application,
     private val repository: TranslationRepository
-) : ViewModel() {
+) : AndroidViewModel(application), TextToSpeech.OnInitListener {
 
+    private var tts: TextToSpeech? = null
+
+    private var isTtsInitialized = false
+    init {
+        tts = TextToSpeech(application.applicationContext, this)
+    }
+    override fun onInit(status: Int) {
+        isTtsInitialized = status == TextToSpeech.SUCCESS
+    }
+    fun speak(text: String) {
+        if (isTtsInitialized) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId")
+        }
+    }
     private val _translatedText = MutableLiveData<String>()
     val translatedText: LiveData<String> get() = _translatedText
 
     fun translateText(text: String, targetLang: String, onResult: (String) -> Unit) {
         Log.d("Translation_viewmodel", "content: $text , targetLanguage: $targetLang")
-
 
         viewModelScope.launch {
             val translated = repository.translateText(
@@ -178,7 +198,7 @@ class HomeViewModel @Inject constructor(
                                             line.text,
                                             line.boundingBox
                                         )
-                                    ) // fallback
+                                    )
                                     processNextLine(index + 1)
                                 }
                         }
@@ -188,7 +208,7 @@ class HomeViewModel @Inject constructor(
                     .addOnFailureListener {
                         Toast.makeText(
                             context,
-                            "Failed to download translation model",
+                            "Failed downlaod",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -196,6 +216,49 @@ class HomeViewModel @Inject constructor(
             .addOnFailureListener {
                 Toast.makeText(context, "OCR failed: ${it.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    fun handleSpeechInput(
+        input: String,
+        sourceSide: String,
+        speakerLang: String,
+        listenerLang: String,
+        onTranslated: (speakerText: String, listenerText: String) -> Unit
+    ) {
+        val targetLang = if (sourceSide == SIDE.Speaker) listenerLang else speakerLang
+        repository.translateText(input, targetLang, { translated ->
+            if (sourceSide == SIDE.Speaker)
+                onTranslated(input, translated)
+            else
+                onTranslated(translated, input)
+        }, {
+            Log.e("SpeechTranslate", "Error: $it")
+        })
+    }
+
+    fun saveBitmapToGallery(context: Context, bitmap: Bitmap, filename: String = "translated_${System.currentTimeMillis()}") {
+        val resolver = context.contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "$filename.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Translations")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+
+        val imageUri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        imageUri?.let { uri ->
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            }
+            contentValues.clear()
+            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, contentValues, null, null)
+
+            Toast.makeText(context, "Saved to gallery!", Toast.LENGTH_SHORT).show()
+        } ?: run {
+            Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -208,3 +271,4 @@ fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observ
         }
     })
 }
+

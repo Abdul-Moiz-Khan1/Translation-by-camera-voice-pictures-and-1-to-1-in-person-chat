@@ -27,7 +27,7 @@ class Bookmarks : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this , R.color.white)
 
         binding.backBtnBookmarks.setOnClickListener {
             finish()

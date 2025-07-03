@@ -28,7 +28,7 @@ class Translation : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTranslationBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this , R.color.white)
 
         val content = intent.getStringExtra("content")
         val targetLanguage = intent.getStringExtra("targetLang")
@@ -61,7 +61,7 @@ class Translation : AppCompatActivity() {
             Toast.makeText(this, "Copied", Toast.LENGTH_SHORT).show()
         }
         binding.speak.setOnClickListener {
-            Toast.makeText(this, "Speaking", Toast.LENGTH_SHORT).show()
+            viewModel.speak(binding.originalText.text.toString())
         }
         binding.fullscreen.setOnClickListener {
             Toast.makeText(this, "Fullscreen", Toast.LENGTH_SHORT).show()

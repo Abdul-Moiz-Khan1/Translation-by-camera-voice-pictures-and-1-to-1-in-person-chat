@@ -17,7 +17,7 @@ class Settings : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this , R.color.white)
 
         binding.backBtnSettings.setOnClickListener {
             finish()

@@ -26,7 +26,7 @@ class SelectLanguage : AppCompatActivity() {
         binding = ActivitySelectLanguageBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
 
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this , R.color.white)
         setContentView(binding.root)
 
         val from = intent.getStringExtra("from")

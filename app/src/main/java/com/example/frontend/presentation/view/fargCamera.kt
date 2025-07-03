@@ -94,7 +94,7 @@ class fargCamera : Fragment() {
                 val selectedLanguage = result.data?.getStringExtra("selected_language_for_camera")
                 selectedLanguage?.let {
                     Log.d("HomeFragment", "Selected: $it")
-                    binding.toLanguageCameraView.text = it // for example
+                    binding.toLanguageCameraView.text = it
                 }
             }
         }
@@ -219,6 +219,13 @@ class fargCamera : Fragment() {
 
         }
 
+        binding.speakFragCamera.setOnClickListener {
+            viewModel.speak(translatedOcr.toString())
+        }
+        binding.downloadFragCamera.setOnClickListener {
+            viewModel.saveBitmapToGallery(requireContext(), translatedBitmap)
+        }
+
         binding.translateFin.setOnClickListener {
             viewModel.processImageAndTranslate(
                 requireContext(),
@@ -254,7 +261,6 @@ class fargCamera : Fragment() {
             binding.FinalbottomLayout.visibility = View.INVISIBLE
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

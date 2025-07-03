@@ -32,12 +32,10 @@ import java.util.Locale
 import java.util.jar.Manifest
 
 @AndroidEntryPoint
-class fragChat : Fragment(), TextToSpeech.OnInitListener {
+class fragChat : Fragment() {
 
     private val viewmodel: HomeViewModel by viewModels()
 
-
-    private lateinit var tts: TextToSpeech
     private lateinit var languagePickerLauncher: ActivityResultLauncher<Intent>
     private lateinit var languagePickerLauncher2: ActivityResultLauncher<Intent>
 
@@ -59,26 +57,19 @@ class fragChat : Fragment(), TextToSpeech.OnInitListener {
             if (result.resultCode == RESULT_OK && result.data != null) {
                 val matches = result.data!!.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 if (!matches.isNullOrEmpty()) {
-                    if (side == SIDE.Speaker) {
-                        binding.textViewSpeakerSide.text = matches[0]
-                        viewmodel.translateText(
-                            matches[0],
-                            binding.ListenerLanguage.text.toString()
-                        )
-                        viewmodel.translateText(matches[0], binding.ListenerLanguage.text.toString()) { translated ->
-                            binding.textViewListenerSide.text = translated
-                        }
-                    } else if(side == SIDE.Listener){
-                        binding.textViewListenerSide.text = matches[0]
-                        viewmodel.translateText(
-                            matches[0],
-                            binding.languageSpeakerSide.text.toString()
-                        )
-                        viewmodel.translateText(matches[0], binding.languageSpeakerSide.text.toString()) { translated ->
-                            binding.textViewSpeakerSide.text = translated
-                        }
-                    }
+                    val spokenText = matches[0]
+                    if (side == SIDE.Speaker) binding.textViewSpeakerSide.text = spokenText
+                    else binding.textViewListenerSide.text = spokenText
 
+                    viewmodel.handleSpeechInput(
+                        spokenText,
+                        side,
+                        binding.languageSpeakerSide.text.toString(),
+                        binding.ListenerLanguage.text.toString()
+                    ) { speakerText, listenerText ->
+                        binding.textViewSpeakerSide.text = speakerText
+                        binding.textViewListenerSide.text = listenerText
+                    }
                 }
             }
         }
@@ -103,7 +94,6 @@ class fragChat : Fragment(), TextToSpeech.OnInitListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tts = TextToSpeech(requireContext(), this)
 
         view.findViewById<ImageView>(R.id.SpeakerSpeaker).setColorFilter(
             ContextCompat.getColor(requireContext(), R.color.appBlue),
@@ -159,10 +149,10 @@ class fragChat : Fragment(), TextToSpeech.OnInitListener {
         }
 
         binding.SpeakerSpeaker.setOnClickListener {
-            speakText(binding.textViewSpeakerSide.text.toString())
+            viewmodel.speak(binding.textViewSpeakerSide.text.toString())
         }
         binding.ListenerSpeaker.setOnClickListener {
-            speakText(binding.textViewListenerSide.text.toString())
+            viewmodel.speak(binding.textViewListenerSide.text.toString())
         }
 
         binding.historButtonChats.setOnClickListener {
@@ -214,20 +204,9 @@ class fragChat : Fragment(), TextToSpeech.OnInitListener {
             }
         }
     }
-    private fun speakText(text: String) {
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId")
-    }
-
-    override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            tts?.language = Locale.ENGLISH // or Locale.ENGLISH etc.
-        }
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        tts?.stop()
-        tts?.shutdown()
     }
 
 }
@@ -236,7 +215,6 @@ object SIDE {
     val Speaker: String = "speaker"
     val Listener: String = "listener"
 }
-
 
 val languageCodeMap = mapOf(
     "Afrikaans" to "af-ZA",
@@ -292,4 +270,3 @@ val languageCodeMap = mapOf(
     "Vietnamese" to "vi-VN",
     "Welsh" to "cy-GB"
 )
-

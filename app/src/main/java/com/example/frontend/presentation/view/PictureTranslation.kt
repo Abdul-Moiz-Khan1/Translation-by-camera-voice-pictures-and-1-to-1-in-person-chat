@@ -22,7 +22,7 @@ class PictureTranslation : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this , R.color.white)
         setContentView(R.layout.activity_picture_translation)
 
         findViewById<ImageView>(R.id.backBtnPictureTranslation).setOnClickListener {
