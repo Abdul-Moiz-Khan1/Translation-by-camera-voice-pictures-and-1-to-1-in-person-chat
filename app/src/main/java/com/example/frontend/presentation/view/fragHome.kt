@@ -2,8 +2,22 @@ package com.example.frontend.presentation.view
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
+import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PixelFormat
+import android.hardware.display.DisplayManager
+import android.media.ImageReader
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,21 +33,29 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.ContentProviderCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.frontend.R
 import com.example.frontend.databinding.FragmentFargCameraBinding
 import com.example.frontend.databinding.FragmentFragHomeBinding
-import com.example.frontend.presentation.viewModel.HomeViewModel
+import com.example.frontend.presentation.service.FloatingButtonService
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class fragHome : Fragment() {
-    private val viewModel: HomeViewModel by viewModels()
+    private val OVERLAY_PERMISSION_REQUEST_CODE = 1001
     private var _binding: FragmentFragHomeBinding? = null
     private val binding get() = _binding!!
+
 
     private val speechRecognizerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -60,7 +82,7 @@ class fragHome : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        createNotificationChannel()
         binding.mic1HomeFrag.setOnClickListener {
             startSpeechToText()
         }
@@ -113,7 +135,6 @@ class fragHome : Fragment() {
 
         binding.toggleButton.setOnClickListener {
             isPowerOn = !isPowerOn
-
             if (isPowerOn) {
                 binding.toggleButton.setBackgroundResource(R.drawable.bg_toggle_on)
                 binding.powerText.text = "ON"
@@ -121,6 +142,12 @@ class fragHome : Fragment() {
                 binding.toggleButton.rotation = 180f
                 binding.powerIcon.rotation = 180f
                 binding.powerText.rotation = 180f
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1002)
+                }
+                Log.d("overlay", "button turned On")
+                checkOverlayPermission()
+
             } else {
                 binding.toggleButton.setBackgroundResource(R.drawable.bg_togglwe)
                 binding.powerText.text = "OFF"
@@ -163,6 +190,86 @@ class fragHome : Fragment() {
         } catch (e: Exception) {
             Log.d("ERRORRR" , e.message.toString())
         }
+
     }
+
+
+    private fun checkOverlayPermission() {
+
+        Log.d("overlay", "inCheckOverlay")
+        if (!android.provider.Settings.canDrawOverlays(requireContext())) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Overlay Permission Needed")
+                .setMessage("This feature requires the 'Display over other apps' permission")
+                .setPositiveButton("Open Settings") { _, _ ->
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:${requireContext().packageName}")
+                    )
+                    startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        } else {
+
+            Log.d("overlay", "overlayPermissionGranted")
+            startFloatingButtonService()
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (android.provider.Settings.canDrawOverlays(requireContext())) {
+                    showFloatingButton()
+                } else {
+                    Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+    private fun showFloatingButton() {
+        val serviceIntent = Intent(requireContext(), FloatingButtonService::class.java)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            requireContext().startForegroundService(serviceIntent)
+        } else {
+            requireContext().startService(serviceIntent)
+        }
+    }
+    private fun startFloatingButtonService() {
+
+        Log.d("overlay", "inStartFloatingButtonService")
+        val serviceIntent = Intent(requireContext(), FloatingButtonService::class.java)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("overlay", "android>8")
+            requireContext().startForegroundService(serviceIntent)
+        } else {
+
+            Log.d("overlay", "android<8")
+            requireContext().startService(serviceIntent)
+        }
+    }
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "floating_button_channel",
+                "Floating Button Service",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Channel for floating button service"
+            }
+
+            val notificationManager = requireContext().getSystemService(
+                Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
 }
+
+
+
+
 
