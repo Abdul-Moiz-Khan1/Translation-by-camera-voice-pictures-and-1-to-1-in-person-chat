@@ -1,5 +1,6 @@
 package com.example.frontend.presentation.view
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private var isPowerOn = false
+
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,4 +58,5 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.nav_host_fragment, fragment)
             .commit()
     }
+
 }

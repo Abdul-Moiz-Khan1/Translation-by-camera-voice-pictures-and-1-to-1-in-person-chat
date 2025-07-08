@@ -272,7 +272,4 @@
         app:layout_constraintTop_toTopOf="@+id/textView" />
 
 
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,9 +1,12 @@
 package com.example.frontend.presentation.service
 
+import android.app.Activity
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
+import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -17,7 +20,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import com.example.frontend.R
+import com.example.frontend.presentation.view.ScreenCapturePermissionStore
 
 class FloatingButtonService : Service() {
 
@@ -46,8 +52,10 @@ class FloatingButtonService : Service() {
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(1, notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            startForeground(
+                1, notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            )
         } else {
             startForeground(1, notification)
         }
@@ -89,12 +97,14 @@ class FloatingButtonService : Service() {
                         initialTouchY = event.rawY
                         return true
                     }
+
                     MotionEvent.ACTION_MOVE -> {
                         params.x = initialX + (event.rawX - initialTouchX).toInt()
                         params.y = initialY + (event.rawY - initialTouchY).toInt()
                         windowManager.updateViewLayout(floatingButton, params)
                         return true
                     }
+
                     MotionEvent.ACTION_UP -> {
                         v.performClick()
                         return true
@@ -105,8 +115,8 @@ class FloatingButtonService : Service() {
         })
 
         floatingButton.setOnClickListener {
-           setupClickHandler()
-                  }
+            setupClickHandler()
+        }
 
         windowManager.addView(floatingButton, params)
     }
@@ -168,18 +178,34 @@ class FloatingButtonService : Service() {
     }
 
     private fun translateText() {
-        val textView = popupView.findViewById<TextView>(R.id.popupText)
-        val currentText = textView.text.toString()
 
-        // Simple translation example - replace with your actual translation logic
-        val translatedText = when (currentText) {
-            "Hello! Click translate below" -> "¡Hola! Haz clic en traducir abajo"
-            "¡Hola! Haz clic en traducir abajo" -> "Bonjour! Cliquez sur traduire ci-dessous"
-            else -> "Hello! Click translate below"
+        val resultCode = ScreenCapturePermissionStore.resultCode
+        val dataIntent = ScreenCapturePermissionStore.dataIntent
+
+
+        Log.d("overlay", "result code $resultCode dataIntent $dataIntent")
+        if (resultCode == Activity.RESULT_OK && dataIntent != null) {
+            val serviceIntent = Intent(applicationContext, MyScreenshotService::class.java).apply {
+                putExtra("code", resultCode)
+                putExtra("data", dataIntent)
+            }
+            ContextCompat.startForegroundService(applicationContext, serviceIntent)
+        } else {
+            Toast.makeText(applicationContext, "Permission not granted yet", Toast.LENGTH_SHORT)
+                .show()
         }
-
-        textView.text = translatedText
-        Toast.makeText(this, "Text translated", Toast.LENGTH_SHORT).show()
+//        val textView = popupView.findViewById<TextView>(R.id.popupText)
+//        val currentText = textView.text.toString()
+//
+//        // Simple translation example - replace with your actual translation logic
+//        val translatedText = when (currentText) {
+//            "Hello! Click translate below" -> "¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo"
+//            "¡Hola! Haz clic en traducir abajo" -> "Bonjour! Cliquez sur traduire ci-dessous"
+//            else -> "Hello! Click translate below"
+//        }
+//
+//        textView.text = translatedText
+//        Toast.makeText(this, "Text translated", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {

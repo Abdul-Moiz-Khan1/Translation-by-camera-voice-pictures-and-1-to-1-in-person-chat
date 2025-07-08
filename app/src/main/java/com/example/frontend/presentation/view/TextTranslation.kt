@@ -1,7 +1,10 @@
 package com.example.frontend.presentation.view
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.text.Editable
@@ -10,13 +13,18 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.frontend.R
 import com.example.frontend.presentation.view.Translation
 import com.example.frontend.databinding.ActivityTextTranslationBinding
+import com.example.frontend.presentation.service.MyScreenshotService
 
 class TextTranslation : AppCompatActivity() {
+
+    private lateinit var mediaProjectionManager: MediaProjectionManager
+    private val REQUEST_CODE_SCREEN_CAPTURE = 1001
     private lateinit var binding: ActivityTextTranslationBinding
     private val speechRecognizerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -32,6 +40,13 @@ class TextTranslation : AppCompatActivity() {
         binding = ActivityTextTranslationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.statusBarColor = ContextCompat.getColor(this , R.color.white)
+
+        mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+
+        binding.captureButton.setOnClickListener {
+            val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
+            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE)
+        }
 
         val textToEdit = intent.getStringExtra("text_to_edit") ?: intent.getStringExtra("content")
 
@@ -119,6 +134,16 @@ class TextTranslation : AppCompatActivity() {
             speechRecognizerLauncher.launch(intent)
         } catch (e: Exception) {
             Log.d("ERRORRR" , e.message.toString())
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SCREEN_CAPTURE && resultCode == RESULT_OK && data != null) {
+            val serviceIntent = Intent(this, MyScreenshotService::class.java).apply {
+                putExtra("code", resultCode)
+                putExtra("data", data)
+            }
+            ContextCompat.startForegroundService(this, serviceIntent)
         }
     }
 }

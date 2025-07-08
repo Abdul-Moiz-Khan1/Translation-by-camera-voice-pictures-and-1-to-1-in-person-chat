@@ -62,6 +62,10 @@
             android:exported="false"
             android:foregroundServiceType="specialUse|mediaProjection"
             />
+        <service
+            android:name=".presentation.service.MyScreenshotService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
 
 
 

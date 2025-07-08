@@ -56,6 +56,22 @@ class fragHome : Fragment() {
     private var _binding: FragmentFragHomeBinding? = null
     private val binding get() = _binding!!
 
+    private val screenCaptureLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            // Store permission data globally
+            ScreenCapturePermissionStore.resultCode = result.resultCode
+            ScreenCapturePermissionStore.dataIntent = result.data
+            Log.d("overlay", "result code ${result.resultCode} result data ${result.data}")
+            // Now start floating service
+            val intent = Intent(requireContext(), FloatingButtonService::class.java)
+            ContextCompat.startForegroundService(requireContext(), intent)
+        } else {
+            Toast.makeText(requireContext(), "Screen capture permission denied", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
 
     private val speechRecognizerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -90,7 +106,7 @@ class fragHome : Fragment() {
 
         binding.translateBtnHomeFrag.setOnClickListener {
             val intent = Intent(requireContext(), Translation::class.java)
-            intent.putExtra("content",   binding.originalTextFragHome.text.toString())
+            intent.putExtra("content", binding.originalTextFragHome.text.toString())
             intent.putExtra(
                 "targetLang",
                 view.findViewById<TextView>(R.id.toLanguageText).text.toString()
@@ -136,14 +152,26 @@ class fragHome : Fragment() {
         binding.toggleButton.setOnClickListener {
             isPowerOn = !isPowerOn
             if (isPowerOn) {
+                val projectionManager =
+                    requireContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                val intent = projectionManager.createScreenCaptureIntent()
+                screenCaptureLauncher.launch(intent)
                 binding.toggleButton.setBackgroundResource(R.drawable.bg_toggle_on)
                 binding.powerText.text = "ON"
-                binding.powerIcon.setColorFilter(ContextCompat.getColor(requireContext(), R.color.appBlue))
+                binding.powerIcon.setColorFilter(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.appBlue
+                    )
+                )
                 binding.toggleButton.rotation = 180f
                 binding.powerIcon.rotation = 180f
                 binding.powerText.rotation = 180f
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1002)
+                    requestPermissions(
+                        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                        1002
+                    )
                 }
                 Log.d("overlay", "button turned On")
                 checkOverlayPermission()
@@ -174,6 +202,7 @@ class fragHome : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
     }
+
     private fun startSpeechToText() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         intent.putExtra(
@@ -188,7 +217,7 @@ class fragHome : Fragment() {
         try {
             speechRecognizerLauncher.launch(intent)
         } catch (e: Exception) {
-            Log.d("ERRORRR" , e.message.toString())
+            Log.d("ERRORRR", e.message.toString())
         }
 
     }
@@ -216,6 +245,7 @@ class fragHome : Fragment() {
             startFloatingButtonService()
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
@@ -228,6 +258,7 @@ class fragHome : Fragment() {
             }
         }
     }
+
     private fun showFloatingButton() {
         val serviceIntent = Intent(requireContext(), FloatingButtonService::class.java)
 
@@ -237,6 +268,7 @@ class fragHome : Fragment() {
             requireContext().startService(serviceIntent)
         }
     }
+
     private fun startFloatingButtonService() {
 
         Log.d("overlay", "inStartFloatingButtonService")
@@ -251,6 +283,7 @@ class fragHome : Fragment() {
             requireContext().startService(serviceIntent)
         }
     }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -262,7 +295,8 @@ class fragHome : Fragment() {
             }
 
             val notificationManager = requireContext().getSystemService(
-                Context.NOTIFICATION_SERVICE) as NotificationManager
+                Context.NOTIFICATION_SERVICE
+            ) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -270,6 +304,8 @@ class fragHome : Fragment() {
 }
 
 
-
-
+object ScreenCapturePermissionStore {
+    var resultCode: Int = -1
+    var dataIntent: Intent? = null
+}
 
