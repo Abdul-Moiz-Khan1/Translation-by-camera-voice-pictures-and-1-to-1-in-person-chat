@@ -187,10 +187,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/bg_right_unselected"
+                android:background="@drawable/bg_right_selected"
                 android:gravity="center"
                 android:text="Original"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:textStyle="bold" />
 
             <TextView
@@ -198,10 +198,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/bg_right_selected"
+                android:background="@drawable/bg_left_unselected"
                 android:gravity="center"
                 android:text="Translated"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 />
         </LinearLayout>
@@ -222,7 +222,7 @@
 
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/from_gallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

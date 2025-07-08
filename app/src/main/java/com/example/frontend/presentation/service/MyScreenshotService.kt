@@ -24,6 +24,8 @@ import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Observer
+import com.example.frontend.presentation.viewModel.OCRViewModel
 import java.io.File
 import java.io.FileOutputStream
 
@@ -55,7 +57,6 @@ class MyScreenshotService : Service() {
 
         imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 1)
 
-        // 🔑 Register the callback (REQUIRED in Android 14+)
         mediaProjection?.registerCallback(object : MediaProjection.Callback() {
             override fun onStop() {
                 super.onStop()
@@ -64,7 +65,6 @@ class MyScreenshotService : Service() {
             }
         }, Handler(Looper.getMainLooper()))
 
-        // ✅ Now safe to create the virtual display
         mediaProjection?.createVirtualDisplay(
             "ScreenCapture",
             width, height, dpi,
@@ -72,7 +72,6 @@ class MyScreenshotService : Service() {
             imageReader?.surface, null, null
         )
 
-        // Wait for image to be captured
         Handler(Looper.getMainLooper()).postDelayed({
             val image = imageReader?.acquireLatestImage()
             image?.let {
@@ -88,38 +87,16 @@ class MyScreenshotService : Service() {
                 )
                 bitmap.copyPixelsFromBuffer(buffer)
                 it.close()
+                OCRViewModelHolder.viewModel.extractTextFromBitmap(bitmap)
+                val ocrObserver = Observer<String> {
+                    OCRViewModelHolder.viewModel.translateText()
+                }
+                OCRViewModelHolder.viewModel.recognizedText.observeForever(ocrObserver)
 
-                saveScreenshotToGallery(this, bitmap)
             }
             stopSelf()
         }, 1000)
     }
-
-    fun saveScreenshotToGallery(context: Context, bitmap: Bitmap) {
-        val filename = "screenshot_${System.currentTimeMillis()}.png"
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Screenshots")
-            put(MediaStore.Images.Media.IS_PENDING, 1)
-        }
-
-        val resolver = context.contentResolver
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-        uri?.let {
-            resolver.openOutputStream(it)?.use { output ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
-            }
-
-            contentValues.clear()
-            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
-            resolver.update(uri, contentValues, null, null)
-
-            Toast.makeText(context, "Screenshot saved to gallery", Toast.LENGTH_SHORT).show()
-        }
-    }
-
 
     private fun createNotification(): Notification {
         val channelId = "screenshot_service"
@@ -136,3 +113,5 @@ class MyScreenshotService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 }
+
+

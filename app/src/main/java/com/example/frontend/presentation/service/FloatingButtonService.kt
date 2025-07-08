@@ -8,7 +8,9 @@ import android.content.pm.ServiceInfo
 import android.graphics.PixelFormat
 import android.media.projection.MediaProjectionManager
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -22,8 +24,14 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import com.example.frontend.R
+import com.example.frontend.presentation.view.ScreenCapturePermissionActivity
 import com.example.frontend.presentation.view.ScreenCapturePermissionStore
+import com.example.frontend.presentation.viewModel.HomeViewModel
+import com.example.frontend.presentation.viewModel.OCRViewModel
 
 class FloatingButtonService : Service() {
 
@@ -32,6 +40,7 @@ class FloatingButtonService : Service() {
 
     private lateinit var popupView: View
     private var isPopupAttached = false
+
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -81,7 +90,6 @@ class FloatingButtonService : Service() {
             y = 100
         }
 
-        // Make the button draggable
         floatingButton.setOnTouchListener(object : View.OnTouchListener {
             private var initialX: Int = 0
             private var initialY: Int = 0
@@ -155,7 +163,6 @@ class FloatingButtonService : Service() {
             y = floatingButton.y.toInt() + floatingButton.height
         }
 
-        // Setup translate button click
         popupView.findViewById<Button>(R.id.translateScreenBtn).setOnClickListener {
             translateText()
         }
@@ -167,7 +174,6 @@ class FloatingButtonService : Service() {
         windowManager.addView(popupView, params)
         isPopupAttached = true
 
-        // Auto-close when touching outside
         popupView.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_OUTSIDE) {
                 windowManager.removeView(popupView)
@@ -182,39 +188,52 @@ class FloatingButtonService : Service() {
         val resultCode = ScreenCapturePermissionStore.resultCode
         val dataIntent = ScreenCapturePermissionStore.dataIntent
 
-
-        Log.d("overlay", "result code $resultCode dataIntent $dataIntent")
-        if (resultCode == Activity.RESULT_OK && dataIntent != null) {
-            val serviceIntent = Intent(applicationContext, MyScreenshotService::class.java).apply {
-                putExtra("code", resultCode)
-                putExtra("data", dataIntent)
-            }
-            ContextCompat.startForegroundService(applicationContext, serviceIntent)
-        } else {
-            Toast.makeText(applicationContext, "Permission not granted yet", Toast.LENGTH_SHORT)
-                .show()
+        if (resultCode != Activity.RESULT_OK || dataIntent == null) {
+            val permissionIntent =
+                Intent(applicationContext, ScreenCapturePermissionActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            startActivity(permissionIntent)
+            return
         }
-//        val textView = popupView.findViewById<TextView>(R.id.popupText)
-//        val currentText = textView.text.toString()
-//
-//        // Simple translation example - replace with your actual translation logic
-//        val translatedText = when (currentText) {
-//            "Hello! Click translate below" -> "¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo¡Hola! Haz clic en traducir abajo"
-//            "¡Hola! Haz clic en traducir abajo" -> "Bonjour! Cliquez sur traduire ci-dessous"
-//            else -> "Hello! Click translate below"
-//        }
-//
-//        textView.text = translatedText
-//        Toast.makeText(this, "Text translated", Toast.LENGTH_SHORT).show()
+
+        val screenshotIntent = Intent(applicationContext, MyScreenshotService::class.java).apply {
+            putExtra("code", resultCode)
+            putExtra("data", dataIntent)
+        }
+        ContextCompat.startForegroundService(applicationContext, screenshotIntent)
+
+        val resultTextView = popupView.findViewById<TextView>(R.id.popupText)
+
+        val translatedObserver = Observer<String> { translated ->
+            resultTextView.text = translated
+            Log.d("FloatingService", "Translated: $translated")
+        }
+        OCRViewModelHolder.viewModel.translatedText.observeForever(translatedObserver)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            OCRViewModelHolder.viewModel.recognizedText.removeObserver(translatedObserver)
+        }, 5000)
+
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (isPopupAttached && ::floatingButton.isInitialized) {
+
+        if (::floatingButton.isInitialized) {
             windowManager.removeView(floatingButton)
         }
-        if (isPopupAttached && ::popupView.isInitialized) {
+
+        if (::popupView.isInitialized) {
             windowManager.removeView(popupView)
         }
+    }
+
+}
+
+object OCRViewModelHolder {
+    val viewModel: OCRViewModel by lazy {
+        OCRViewModel()
     }
 }

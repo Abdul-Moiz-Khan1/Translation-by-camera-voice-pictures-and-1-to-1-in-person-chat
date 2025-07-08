@@ -47,6 +47,8 @@ import com.example.frontend.R
 import com.example.frontend.databinding.FragmentFargCameraBinding
 import com.example.frontend.databinding.FragmentFragHomeBinding
 import com.example.frontend.presentation.service.FloatingButtonService
+import com.example.frontend.presentation.service.MyScreenshotService
+import com.example.frontend.presentation.service.OCRViewModelHolder
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -60,11 +62,11 @@ class fragHome : Fragment() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
-            // Store permission data globally
+
             ScreenCapturePermissionStore.resultCode = result.resultCode
             ScreenCapturePermissionStore.dataIntent = result.data
             Log.d("overlay", "result code ${result.resultCode} result data ${result.data}")
-            // Now start floating service
+
             val intent = Intent(requireContext(), FloatingButtonService::class.java)
             ContextCompat.startForegroundService(requireContext(), intent)
         } else {
@@ -188,6 +190,14 @@ class fragHome : Fragment() {
                 binding.toggleButton.rotation = 0f
                 binding.powerIcon.rotation = 0f
                 binding.powerText.rotation = 0f
+
+                val floatIntent = Intent(requireContext(), FloatingButtonService::class.java)
+                requireContext().stopService(floatIntent)
+
+                val screenshotIntent = Intent(requireContext(), MyScreenshotService::class.java)
+                requireContext().stopService(screenshotIntent)
+
+                OCRViewModelHolder.viewModel.reset()
             }
         }
 

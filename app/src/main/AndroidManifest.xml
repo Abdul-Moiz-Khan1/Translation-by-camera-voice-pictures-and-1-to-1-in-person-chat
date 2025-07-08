@@ -66,7 +66,8 @@
             android:name=".presentation.service.MyScreenshotService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
-
+        <activity android:name=".presentation.view.ScreenCapturePermissionActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
 
 
     </application>

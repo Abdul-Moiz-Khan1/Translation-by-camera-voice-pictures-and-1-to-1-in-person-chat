@@ -63,32 +63,8 @@ class HomeViewModel @Inject constructor(
     private val _translatedText = MutableLiveData<String>()
     val translatedText: LiveData<String> get() = _translatedText
 
-    fun translateText(text: String, targetLang: String, onResult: (String) -> Unit) {
-        Log.d("Translation_viewmodel", "content: $text , targetLanguage: $targetLang")
-
-        viewModelScope.launch {
-            val translated = repository.translateText(
-                text,
-                targetLang,
-                onResult = {
-                    _translatedText.value = it
-                    viewModelScope.launch {
-                        repository.saveToHistory(
-                            HistoryItem(
-                                0,
-                                language = targetLang,
-                                originalText = text,
-                                translatedText = it
-                            )
-                        )
-                    }
-
-                    onResult(translatedText.value.toString())
-                },
-                onError = { _translatedText.value = it }
-            )
-        }
-    }
+    private val _recognizedText = MutableLiveData<String>()
+    val recognizedText: LiveData<String> get() = _recognizedText
 
 
     fun translateText(text: String, targetLangCode: String) {

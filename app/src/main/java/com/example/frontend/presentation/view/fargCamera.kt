@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -51,6 +52,19 @@ class fargCamera : Fragment() {
     lateinit var translatedBitmap: Bitmap
     var originalOcr: String? = "abc"
     var translatedOcr: String? = "abc"
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+           finalUri = uri
+            setFrame(finalUri)
+
+            Log.d("SelectedImage", "URI: $uri")
+        } else {
+            Log.d("SelectedImage", "No media selected")
+        }
+    }
 
     private val cropImageLauncher = registerForActivityResult(CropImageContract()) { result ->
         if (result.isSuccessful) {
@@ -113,6 +127,10 @@ class fargCamera : Fragment() {
         }
 
         translatedBtn.setOnClickListener {
+            if(!::translatedBitmap.isInitialized){
+                Toast.makeText(requireContext(), "Processing", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             translatedBtn.setBackgroundResource(R.drawable.bg_right_selected)
             originalBtn.setBackgroundResource(R.drawable.bg_right_unselected)
             translatedBtn.setTextColor(Color.BLACK)
@@ -171,7 +189,12 @@ class fargCamera : Fragment() {
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
+        binding.fromGallery.setOnClickListener {
+            pickImageLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
 
+        }
         binding.capture.setOnClickListener {
 
             val imageCapture = imageCapture ?: return@setOnClickListener
@@ -194,16 +217,10 @@ class fargCamera : Fragment() {
                             )
                         )
                         binding.previewView.visibility = View.GONE
-                        binding.capturedFrame.apply {
-                            visibility = View.VISIBLE
-                            setImageURI(savedUri)
-                            finalUri = savedUri
-                            binding.translateBtnLayout.visibility = View.VISIBLE
-                            binding.bottomLayout.visibility = View.INVISIBLE
-                            binding.topButtons.visibility = View.INVISIBLE
-                            binding.backAndCrop.visibility = View.VISIBLE
-                        }
+                        setFrame(savedUri)
+
                     }
+
 
 
                     override fun onError(exception: ImageCaptureException) {
@@ -227,21 +244,7 @@ class fargCamera : Fragment() {
         }
 
         binding.translateFin.setOnClickListener {
-            viewModel.processImageAndTranslate(
-                requireContext(),
-                finalUri,
-                binding.toLanguageCameraView.text.toString()
-            ) { finalBitmap, original, translated ->
-                translatedBitmap = finalBitmap
-                originalOcr = original
-                translatedOcr = translated
-                binding.capturedFrame.setImageBitmap(finalBitmap)
-            }
-
-            binding.translateBtnLayout.visibility = View.INVISIBLE
-            binding.backAndCrop.visibility = View.INVISIBLE
-            binding.finalTopLayout.visibility = View.VISIBLE
-            binding.FinalbottomLayout.visibility = View.VISIBLE
+            processImageAndViews()
         }
 
         binding.copyFragCamera.setOnClickListener {
@@ -295,4 +298,35 @@ class fargCamera : Fragment() {
 
         }, ContextCompat.getMainExecutor(requireContext()))
     }
+    private fun fargCamera.processImageAndViews() {
+        viewModel.processImageAndTranslate(
+            requireContext(),
+            finalUri,
+            binding.toLanguageCameraView.text.toString()
+        ) { finalBitmap, original, translated ->
+            translatedBitmap = finalBitmap
+            originalOcr = original
+            translatedOcr = translated
+            binding.capturedFrame.setImageBitmap(finalBitmap)
+        }
+
+        binding.translateBtnLayout.visibility = View.INVISIBLE
+        binding.backAndCrop.visibility = View.INVISIBLE
+        binding.finalTopLayout.visibility = View.VISIBLE
+        binding.FinalbottomLayout.visibility = View.VISIBLE
+    }
+    private fun setFrame(savedUri: Uri) {
+        binding.capturedFrame.apply {
+            visibility = View.VISIBLE
+            setImageURI(savedUri)
+            finalUri = savedUri
+            binding.previewView.visibility = View.INVISIBLE
+            binding.translateBtnLayout.visibility = View.VISIBLE
+            binding.bottomLayout.visibility = View.INVISIBLE
+            binding.topButtons.visibility = View.INVISIBLE
+            binding.backAndCrop.visibility = View.VISIBLE
+        }
+    }
 }
+
+
