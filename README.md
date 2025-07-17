@@ -64,5 +64,50 @@ Step-by-Step Flow:
 8. Display Result
         The translated text is displayed immediately in the target text field.
 
+# Screenshots
+
+## Main Page
+
+<p align="center">
+<img width="692" height="1384" alt="translation_main" src="https://github.com/user-attachments/assets/061027e2-6481-4490-bd74-6d12fd89290c" />
+</p>
+
+## Text Transaltion
+
+<p align="center">
+<img width="695" height="1390" alt="translation_translation" src="https://github.com/user-attachments/assets/555d24a0-7b5b-43ab-a56d-d391c4788fa8" />
+</p>
+
+## 1 to 1 Conversation
+
+<p align="center">
+<img width="700" height="1399" alt="translation_convo" src="https://github.com/user-attachments/assets/22593930-c6be-42ca-a0b7-64db8600c68d" />
+</p>
+
+## Live Camera Translation
+
+<p align="center">
+<img width="700" height="1400" alt="translation_camera" src="https://github.com/user-attachments/assets/05bfe4d6-7be6-48c5-8673-86a8b66767c5" />
+</p>
+<p align="center">
+<img width="687" height="1373" alt="translation_translatedImage" src="https://github.com/user-attachments/assets/3cce189a-59ea-4d3b-9810-b29331295367" />
+</p>
+
+## Settings
+
+<p align="center">
+<img width="699" height="1397" alt="translation_settings" src="https://github.com/user-attachments/assets/72bfada8-85ea-419e-a6b4-0c7c4ab115b4" />
+</p>
+
+## History
+
+<p align="center">
+<img width="694" height="1389" alt="translation_history" src="https://github.com/user-attachments/assets/64c285e6-c08d-47de-9d3f-2535327cfff5" />
+</p>
+
+
+
+
+
 
 
