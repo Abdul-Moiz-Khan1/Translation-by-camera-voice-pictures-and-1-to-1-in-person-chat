@@ -57,10 +57,11 @@ Step-by-Step Flow:
         b. If not downloaded, it automatically downloads the translation model for offline use.
         c. If already downloaded, it proceeds instantly.
 6. Translation Execution
+   
         a. The text is passed to the ML Kit's translator:
         b. Translation is performed entirely on-device
         c. No data is sent to servers, ensuring privacy & speed
-7. Display Result
+8. Display Result
         The translated text is displayed immediately in the target text field.
 
 
