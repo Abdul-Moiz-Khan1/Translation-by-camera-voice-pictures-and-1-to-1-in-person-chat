@@ -1,5 +1,5 @@
 
-#AI Translator App
+# AI Translator App
 
 An Android application that allows users to translate text between 150+ languages using Google ML Kit. Designed with a clean, modern UI (as shown in the Figma design) and built for simplicity, speed, and offline-first support.
 
