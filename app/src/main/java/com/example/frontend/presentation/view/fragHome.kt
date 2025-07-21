@@ -49,6 +49,16 @@ import com.example.frontend.databinding.FragmentFragHomeBinding
 import com.example.frontend.presentation.service.FloatingButtonService
 import com.example.frontend.presentation.service.MyScreenshotService
 import com.example.frontend.presentation.service.OCRViewModelHolder
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -57,6 +67,9 @@ class fragHome : Fragment() {
     private val OVERLAY_PERMISSION_REQUEST_CODE = 1001
     private var _binding: FragmentFragHomeBinding? = null
     private val binding get() = _binding!!
+    private var rewardedInterstitialAd: RewardedInterstitialAd? = null
+    private var rewardedAd: RewardedAd? = null
+
 
     private val screenCaptureLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -101,19 +114,48 @@ class fragHome : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         createNotificationChannel()
+
+        loadRewardedInterstitialAd()
+        laodRewardedVideoAd()
         binding.mic1HomeFrag.setOnClickListener {
             startSpeechToText()
         }
 
-
+        MobileAds.initialize(requireContext())
+        val adView = view.findViewById<AdView>(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
         binding.translateBtnHomeFrag.setOnClickListener {
-            val intent = Intent(requireContext(), Translation::class.java)
-            intent.putExtra("content", binding.originalTextFragHome.text.toString())
-            intent.putExtra(
-                "targetLang",
-                view.findViewById<TextView>(R.id.toLanguageText).text.toString()
-            )
-            startActivity(intent)
+
+
+            AdPrefs.incrementClickCount(requireContext())
+            val count = AdPrefs.getClickCount(requireContext())
+
+            if (count % 3 == 0 && rewardedInterstitialAd != null) {
+                rewardedInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        rewardedInterstitialAd = null
+                        AdPrefs.resetClickCount(requireContext())
+                        loadRewardedInterstitialAd()
+                    }
+
+                    override fun onAdFailedToShowFullScreenContent(p0: AdError) {
+                        rewardedInterstitialAd = null
+                        loadRewardedInterstitialAd()
+                    }
+
+                    override fun onAdShowedFullScreenContent() {
+                        Log.d("AdDemo", "Ad shown")
+                    }
+                }
+
+                rewardedInterstitialAd?.show(requireActivity()) { rewardItem ->
+
+                    startTranslation()
+                }
+            } else {
+                startTranslation()
+            }
         }
 
         binding.settingsBtn.setOnClickListener {
@@ -154,29 +196,7 @@ class fragHome : Fragment() {
         binding.toggleButton.setOnClickListener {
             isPowerOn = !isPowerOn
             if (isPowerOn) {
-                val projectionManager =
-                    requireContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-                val intent = projectionManager.createScreenCaptureIntent()
-                screenCaptureLauncher.launch(intent)
-                binding.toggleButton.setBackgroundResource(R.drawable.bg_toggle_on)
-                binding.powerText.text = "ON"
-                binding.powerIcon.setColorFilter(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.appBlue
-                    )
-                )
-                binding.toggleButton.rotation = 180f
-                binding.powerIcon.rotation = 180f
-                binding.powerText.rotation = 180f
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    requestPermissions(
-                        arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                        1002
-                    )
-                }
-                Log.d("overlay", "button turned On")
-                checkOverlayPermission()
+                loadVideoAd()
 
             } else {
                 binding.toggleButton.setBackgroundResource(R.drawable.bg_togglwe)
@@ -207,6 +227,27 @@ class fragHome : Fragment() {
             startActivity(intent)
 
         }
+    }
+
+    private fun laodRewardedVideoAd() {
+        val adRequest = AdRequest.Builder().build()
+
+        RewardedAd.load(
+            requireContext(),
+            "ca-app-pub-3940256099942544/5224354917", // Test Ad Unit ID
+            adRequest,
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedAd) {
+                    rewardedAd = ad
+                    Log.d("RewardedAd", "Ad was loaded.")
+                }
+
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    Log.d("RewardedAd", "Failed to load ad: ${adError.message}")
+                    rewardedAd = null
+                }
+            }
+        )
     }
 
     override fun onDestroyView() {
@@ -311,7 +352,95 @@ class fragHome : Fragment() {
         }
     }
 
+    private fun startTranslation() {
+        val intent = Intent(requireContext(), Translation::class.java)
+        intent.putExtra("content", binding.originalTextFragHome.text.toString())
+        intent.putExtra(
+            "targetLang",
+            view?.findViewById<TextView>(R.id.toLanguageText)?.text.toString()
+        )
+        startActivity(intent)
+    }
+
+    private fun loadRewardedInterstitialAd() {
+        RewardedInterstitialAd.load(
+            requireContext(),
+            "ca-app-pub-3940256099942544/5354046379",
+            AdRequest.Builder().build(),
+            object : RewardedInterstitialAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedInterstitialAd) {
+                    rewardedInterstitialAd = ad
+                    Log.d("AdDemo", "Rewarded Interstitial Ad loaded")
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    rewardedInterstitialAd = null
+                    Log.d("AdDemo", "Failed to load rewarded interstitial: ${error.message}")
+                }
+            }
+        )
+    }
+
+    private fun loadVideoAd() {
+        if (rewardedAd != null) {
+            rewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdShowedFullScreenContent() {
+                    Log.d("RewardedAd", "Ad is shown.")
+                }
+
+                override fun onAdDismissedFullScreenContent() {
+                    Log.d("RewardedAd", "Ad was dismissed.")
+
+                    rewardedAd = null
+                }
+
+                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                    Log.d("RewardedAd", "Ad failed to show: ${adError.message}")
+
+                    loadService()
+                    rewardedAd = null
+                }
+            }
+
+            rewardedAd?.show(requireActivity()) { rewardItem ->
+                val rewardAmount = rewardItem.amount
+                val rewardType = rewardItem.type
+                Log.d("RewardedAd", "User earned reward: $rewardAmount $rewardType")
+                loadService()
+            }
+        } else {
+            Log.d("RewardedAd", "The rewarded ad wasn't ready yet.")
+        }
+
+    }
+    private fun loadService() {
+        val projectionManager =
+            requireContext().getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        val intent = projectionManager.createScreenCaptureIntent()
+        screenCaptureLauncher.launch(intent)
+        binding.toggleButton.setBackgroundResource(R.drawable.bg_toggle_on)
+        binding.powerText.text = "ON"
+        binding.powerIcon.setColorFilter(
+            ContextCompat.getColor(
+                requireContext(),
+                R.color.appBlue
+            )
+        )
+        binding.toggleButton.rotation = 180f
+        binding.powerIcon.rotation = 180f
+        binding.powerText.rotation = 180f
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                1002
+            )
+        }
+        Log.d("overlay", "button turned On")
+        checkOverlayPermission()
+    }
 }
+
+
 
 
 object ScreenCapturePermissionStore {
@@ -319,3 +448,25 @@ object ScreenCapturePermissionStore {
     var dataIntent: Intent? = null
 }
 
+object AdPrefs {
+    private const val PREF_NAME = "ad_prefs"
+    private const val KEY_COUNT = "click_count"
+
+    fun getClickCount(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_COUNT, 0)
+    }
+
+    fun incrementClickCount(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        val current = prefs.getInt(KEY_COUNT, 0)
+        editor.putInt(KEY_COUNT, current + 1)
+        editor.apply()
+    }
+
+    fun resetClickCount(context: Context) {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_COUNT, 0).apply()
+    }
+}

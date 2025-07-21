@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
@@ -26,6 +26,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FrontEnd"
         tools:targetApi="31">
+        <activity
+            android:name=".presentation.view.Splash"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".presentation.view.Bookmarks"
             android:exported="false" />
@@ -50,11 +59,7 @@
         <activity
             android:name=".presentation.view.MainActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
@@ -64,16 +69,19 @@
             android:name=".presentation.service.FloatingButtonService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse|mediaProjection"
-            />
+            android:foregroundServiceType="specialUse|mediaProjection" />
         <service
             android:name=".presentation.service.MyScreenshotService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
-        <activity android:name=".presentation.view.ScreenCapturePermissionActivity"
+
+        <activity
+            android:name=".presentation.view.ScreenCapturePermissionActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
 
-
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
     </application>
 
 </manifest>

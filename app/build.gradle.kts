@@ -93,4 +93,9 @@ dependencies {
 
     implementation ("com.google.mlkit:text-recognition:16.0.0")
 
+
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
+    implementation("com.google.guava:guava:31.1-android")
+    implementation("androidx.lifecycle:lifecycle-process:2.9.2")
+
 }

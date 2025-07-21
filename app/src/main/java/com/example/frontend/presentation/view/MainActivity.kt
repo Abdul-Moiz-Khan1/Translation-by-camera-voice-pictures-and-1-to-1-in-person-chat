@@ -3,13 +3,21 @@ package com.example.frontend.presentation.view
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.frontend.MyApp
 import com.example.frontend.R
 import com.example.frontend.databinding.ActivityMainBinding
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import com.google.android.gms.ads.appopen.AppOpenAd
+import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 
 
 @AndroidEntryPoint
@@ -24,10 +32,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.statusBarColor = ContextCompat.getColor(this , R.color.appBackground)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.appBackground)
 
         bottomNav = findViewById(R.id.bottomNavigationView)
-
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.nav_host_fragment, fragHome())
@@ -40,14 +47,17 @@ class MainActivity : AppCompatActivity() {
                     replaceFragment(fragHome())
                     true
                 }
+
                 R.id.nav_chat -> {
                     replaceFragment(fragChat())
                     true
                 }
+
                 R.id.nav_camera -> {
                     replaceFragment(fargCamera())
                     true
                 }
+
                 else -> false
             }
         }
@@ -59,4 +69,13 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
+
+
 }
+
+
+
+
+
+
+

@@ -8,10 +8,12 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -25,12 +27,16 @@ import com.example.frontend.databinding.FragmentFargCameraBinding
 import com.example.frontend.databinding.FragmentFragChatBinding
 import com.example.frontend.presentation.viewModel.HomeViewModel
 import com.example.frontend.presentation.viewModel.observeOnce
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.mlkit.nl.languageid.LanguageIdentification
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import java.util.Locale
 import java.util.jar.Manifest
-
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.AdSize
 @AndroidEntryPoint
 class fragChat : Fragment() {
 
@@ -38,6 +44,7 @@ class fragChat : Fragment() {
 
     private lateinit var languagePickerLauncher: ActivityResultLauncher<Intent>
     private lateinit var languagePickerLauncher2: ActivityResultLauncher<Intent>
+    private lateinit var adView: AdView
 
     private val requestMicPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -93,7 +100,18 @@ class fragChat : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        MobileAds.initialize(requireContext()) {}
 
+        val adContainer = binding.root.findViewById<FrameLayout>(R.id.ad_container)
+        adView = AdView(requireContext())
+        adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // ✅ Test banner ad unit
+        adContainer.addView(adView)
+
+        val adSize = getAdSize(adContainer)
+        adView.setAdSize(adSize)
+
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
 
         view.findViewById<ImageView>(R.id.SpeakerSpeaker).setColorFilter(
             ContextCompat.getColor(requireContext(), R.color.appBlue),
@@ -206,8 +224,21 @@ class fragChat : Fragment() {
     }
 
     override fun onDestroyView() {
+        adView.destroy()
         super.onDestroyView()
     }
+    private fun getAdSize(container: ViewGroup): AdSize {
+        val display = requireActivity().windowManager.defaultDisplay
+        val outMetrics = DisplayMetrics()
+        display.getMetrics(outMetrics)
+
+        val density = outMetrics.density
+        val adWidthPixels = container.width.takeIf { it > 0 } ?: outMetrics.widthPixels
+        val adWidth = (adWidthPixels / density).toInt()
+
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(requireContext(), adWidth)
+    }
+
 
 }
 

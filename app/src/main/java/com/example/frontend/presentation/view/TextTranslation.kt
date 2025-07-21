@@ -20,6 +20,9 @@ import com.example.frontend.R
 import com.example.frontend.presentation.view.Translation
 import com.example.frontend.databinding.ActivityTextTranslationBinding
 import com.example.frontend.presentation.service.MyScreenshotService
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 
 class TextTranslation : AppCompatActivity() {
 
@@ -37,16 +40,21 @@ class TextTranslation : AppCompatActivity() {
         }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityTextTranslationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.statusBarColor = ContextCompat.getColor(this , R.color.white)
 
         mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
-        binding.captureButton.setOnClickListener {
-            val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
-            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE)
-        }
+        MobileAds.initialize(this) {}
+        val adRequest = AdRequest.Builder().build()
+        binding.mediumBannerAdView.loadAd(adRequest)
+        binding = ActivityTextTranslationBinding.inflate(layoutInflater)
+//        binding.captureButton.setOnClickListener {
+//            val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
+//            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE)
+//        }
 
         val textToEdit = intent.getStringExtra("text_to_edit") ?: intent.getStringExtra("content")
 
@@ -58,7 +66,9 @@ class TextTranslation : AppCompatActivity() {
         binding.micbtn123.setOnClickListener {
             startSpeechToText()
         }
-
+        binding.backBtnTranslate.setOnClickListener {
+            finish()
+        }
         binding.fromlangTextTranslator.setOnClickListener {
             startActivity(Intent(this, SelectLanguage::class.java))
         }

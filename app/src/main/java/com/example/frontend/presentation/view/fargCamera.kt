@@ -34,6 +34,12 @@ import com.canhub.cropper.CropImageView
 import com.example.frontend.R
 import com.example.frontend.databinding.FragmentFargCameraBinding
 import com.example.frontend.presentation.viewModel.HomeViewModel
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.mlkit.nl.translate.TranslateLanguage
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -52,6 +58,8 @@ class fargCamera : Fragment() {
     lateinit var translatedBitmap: Bitmap
     var originalOcr: String? = "abc"
     var translatedOcr: String? = "abc"
+    val adRequest = AdRequest.Builder().build()
+    private var mInterstitialAd: InterstitialAd? = null
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -101,6 +109,20 @@ class fargCamera : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        InterstitialAd.load(requireContext(),
+            "ca-app-pub-3940256099942544/1033173712", // Test ID
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    mInterstitialAd = interstitialAd
+                    Log.d("AdDemo", "Interstitial ad loaded.")
+                }
+
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                    Log.d("AdDemo", "Failed to load interstitial: ${loadAdError.message}")
+                    mInterstitialAd = null
+                }
+            })
         languagePickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -244,7 +266,49 @@ class fargCamera : Fragment() {
         }
 
         binding.translateFin.setOnClickListener {
-            processImageAndViews()
+            if (mInterstitialAd != null) {
+                mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        mInterstitialAd = null
+                        processImageAndViews()
+                    }
+
+                    override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                        mInterstitialAd = null
+                        processImageAndViews()
+                    }
+
+                    override fun onAdShowedFullScreenContent() {
+                        Log.d("AdDemo", "Ad shown.")
+                    }
+                }
+
+                mInterstitialAd?.show(requireActivity())
+            } else {
+                Log.d("AdDemo", "Ad not ready. Loading now...")
+                // Load ad and then do fallback work
+                val adRequest = AdRequest.Builder().build()
+                InterstitialAd.load(requireContext(),
+                    "ca-app-pub-3940256099942544/1033173712",
+                    adRequest,
+                    object : InterstitialAdLoadCallback() {
+                        override fun onAdLoaded(ad: InterstitialAd) {
+                            mInterstitialAd = ad
+                            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                                override fun onAdDismissedFullScreenContent() {
+                                    mInterstitialAd = null
+                                    processImageAndViews()
+                                }
+                            }
+                            ad.show(requireActivity())
+                        }
+
+                        override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                            Log.d("AdDemo", "Ad failed to load: ${loadAdError.message}")
+                            processImageAndViews()
+                        }
+                    })
+            }
         }
 
         binding.copyFragCamera.setOnClickListener {
