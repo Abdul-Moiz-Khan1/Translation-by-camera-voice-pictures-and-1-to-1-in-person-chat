@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.nav_host_fragment, fragHome())
                 .commit()
         }
-
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
